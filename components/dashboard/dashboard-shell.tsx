@@ -5,9 +5,12 @@ import { AnimatePresence } from 'framer-motion'
 import { NavRail } from './nav-rail'
 import { SearchModal } from './search-modal'
 import { CursorLight } from '@/motion'
+import { useTheme } from '@/context/theme-context'
+import { cn } from '@/lib/cn'
 
 export function DashboardShell({ children }: { children: React.ReactNode }) {
   const [searchOpen, setSearchOpen] = useState(false)
+  const { theme } = useTheme()
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -21,14 +24,24 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
     return () => window.removeEventListener('keydown', handler)
   }, [])
 
+  // Sync html/body bg with dashboard theme to prevent dark overscroll bleed
+  useEffect(() => {
+    const bg = theme === 'light' ? '#f8f7f4' : '#060606'
+    document.documentElement.style.backgroundColor = bg
+    document.body.style.backgroundColor = bg
+    return () => {
+      document.documentElement.style.backgroundColor = ''
+      document.body.style.backgroundColor = ''
+    }
+  }, [theme])
+
   return (
-    <div className="flex min-h-dvh bg-[var(--bg)]">
+    <div className={cn('flex min-h-dvh bg-[var(--bg)] dashboard-main', theme === 'light' && 'light')}>
       <CursorLight size={500} intensity={0.03} />
 
       <NavRail onSearch={() => setSearchOpen(true)} />
 
-      {/* Workspace — offset by rail width */}
-      <main className="flex-1 ml-[52px] min-h-dvh overflow-y-auto overflow-x-hidden">
+      <main className="flex-1 ml-60 min-h-dvh overflow-y-auto overflow-x-hidden">
         {children}
       </main>
 

@@ -1,0 +1,16 @@
+name: Notify Infrastructure
+
+on:
+  push:
+    branches: [master]
+
+jobs:
+  dispatch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger UI deploy in capifort-infra
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.INFRA_DISPATCH_TOKEN }}
+          repository: ${{ secrets.INFRA_REPO }}
+          event-type: deploy-ui

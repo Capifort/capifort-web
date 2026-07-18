@@ -116,7 +116,7 @@ export function Hero() {
               style={{ x: hlX, y: hlY }}
             >
               {['Knowledge', 'becomes'].map((line, i) => (
-                <span key={line} className="block overflow-hidden leading-[1.05]">
+                <span key={line} className="block overflow-hidden leading-[1.05] pb-[0.15em] mb-[-0.15em]">
                   <motion.span
                     className="block"
                     initial={{ y: '105%', opacity: 0 }}
@@ -131,7 +131,7 @@ export function Hero() {
                   </motion.span>
                 </span>
               ))}
-              <span className="block overflow-hidden leading-[1.05]">
+              <span className="block overflow-hidden leading-[1.05] pb-[0.15em]">
                 <motion.span
                   className="block text-gradient-accent"
                   initial={{ y: '105%', opacity: 0 }}

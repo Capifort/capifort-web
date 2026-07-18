@@ -1,70 +1,65 @@
 'use client'
 
+import { useState, useRef, useEffect } from 'react'
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
-import { Layers, Activity, Zap, Command, Settings2, LogOut, Cloud, Shield } from 'lucide-react'
+import {
+  LayoutGrid, Layers, FileText, BrainCircuit, Bot, MessageSquare,
+  Activity, Users, Settings2, LogOut, Cloud, Shield, Sun, Moon,
+  Search, ChevronDown, HardDrive,
+} from 'lucide-react'
 import { cn } from '@/lib/cn'
 import { useAuth } from '@/context/auth-context'
 import { useFeature } from '@/hooks/use-feature'
+import { useTheme } from '@/context/theme-context'
 
 interface NavRailProps {
   onSearch: () => void
 }
 
-// ── Rail icon button ───────────────────────────────────
+// ── Nav item ───────────────────────────────────────────
 
-function RailButton({
+function NavItem({
   icon: Icon,
   label,
-  active = false,
-  onClick,
   href,
+  active = false,
+  disabled = false,
 }: {
   icon: React.ElementType
   label: string
+  href: string
   active?: boolean
-  onClick?: () => void
-  href?: string
+  disabled?: boolean
 }) {
   const cls = cn(
-    'relative group flex items-center justify-center w-9 h-9 rounded',
-    'transition-colors duration-fast',
+    'flex items-center gap-2.5 px-3 py-2 rounded-md',
+    'dash-sidebar transition-colors duration-fast',
     active
-      ? 'text-[var(--accent)] bg-[var(--accent-dim)]'
-      : 'text-[var(--subtle)] hover:text-[var(--text-2)] hover:bg-[var(--surface-2)]',
+      ? 'bg-[var(--accent-dim)] text-[var(--text)]'
+      : disabled
+        ? 'text-[var(--subtle)] cursor-default'
+        : 'text-[var(--muted)] hover:text-[var(--text-2)] hover:bg-[var(--surface-2)]',
   )
 
-  const tooltip = (
-    <span
-      className={cn(
-        'absolute left-full ml-3 px-2 py-1',
-        'type-label text-[var(--text-2)] bg-[var(--surface-3)]',
-        'border border-[var(--border)] rounded',
-        'whitespace-nowrap pointer-events-none',
-        'opacity-0 group-hover:opacity-100',
-        'translate-x-1 group-hover:translate-x-0',
-        'transition-all duration-fast',
-        'z-tooltip',
+  const content = (
+    <>
+      <Icon size={15} strokeWidth={1.5} className="flex-shrink-0" />
+      <span className="flex-1 truncate">{label}</span>
+      {disabled && (
+        <span className="dash-small-label text-[var(--subtle)]">Soon</span>
       )}
-    >
-      {label}
-    </span>
+    </>
   )
 
-  if (href) {
-    return (
-      <Link href={href} className={cls} aria-label={label}>
-        <Icon size={15} strokeWidth={1.5} />
-        {tooltip}
-      </Link>
-    )
+  if (disabled) {
+    return <div className={cls} aria-disabled>{content}</div>
   }
 
   return (
-    <button onClick={onClick} className={cls} aria-label={label}>
-      <Icon size={15} strokeWidth={1.5} />
-      {tooltip}
-    </button>
+    <Link href={href} className={cls}>
+      {content}
+    </Link>
   )
 }
 
@@ -74,119 +69,154 @@ export function NavRail({ onSearch }: NavRailProps) {
   const pathname = usePathname()
   const { user, isAdmin, logout } = useAuth()
   const hasAws = useFeature('aws_integration')
+  const { theme, toggle } = useTheme()
+  const [menuOpen, setMenuOpen] = useState(false)
+  const menuRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!menuOpen) return
+    const handler = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) setMenuOpen(false)
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [menuOpen])
 
   const initials = user?.username?.[0]?.toUpperCase() || '?'
+
+  const primaryNav = [
+    { icon: LayoutGrid,    label: 'Dashboard',  href: '/dashboard' },
+    { icon: Layers,        label: 'Workspaces', href: '/dashboard/workspaces', disabled: true },
+    { icon: FileText,      label: 'Files',      href: '/dashboard/files',      disabled: true },
+    { icon: BrainCircuit,  label: 'Knowledge',  href: '/dashboard/knowledge',  disabled: true },
+    { icon: Bot,           label: 'Agents',     href: '/dashboard/agents',     disabled: true },
+    { icon: MessageSquare, label: 'Chat',       href: '/dashboard/chat',       disabled: true },
+    { icon: Activity,      label: 'Activity',   href: '/dashboard/activity',   disabled: true },
+    { icon: Users,         label: 'Members',    href: '/dashboard/settings' },
+  ]
 
   return (
     <aside
       className={cn(
         'fixed left-0 top-0 bottom-0 z-float',
-        'w-[52px] flex flex-col items-center justify-between',
-        'py-5',
+        'w-60 flex flex-col justify-between',
+        'py-5 px-3',
         'bg-[var(--surface)] border-r border-[var(--border)]',
       )}
       aria-label="Navigation rail"
     >
-      {/* Top: logo + primary nav */}
-      <div className="flex flex-col items-center gap-6">
-        <Link
-          href="/"
-          className="type-label text-[var(--accent)] hover:text-[var(--accent-warm)] transition-colors duration-fast"
-          aria-label="North — Home"
-        >
-          N
+      {/* Top: wordmark + primary nav */}
+      <div className="flex flex-col gap-6 min-h-0">
+        <Link href="/" className="flex items-center gap-2 px-1" aria-label="North — Home">
+          <span className="text-[var(--accent)]" style={{ fontSize: '15px' }}>✧</span>
+          <span className="dash-card-title text-[var(--text)]" style={{ fontSize: '15px' }}>
+            NORTH
+          </span>
         </Link>
 
-        <div className="w-5 h-px bg-[var(--border)]" />
+        {/* Search trigger */}
+        <button
+          onClick={onSearch}
+          className={cn(
+            'flex items-center gap-2 px-3 py-2 rounded-md',
+            'border border-[var(--border)] bg-[var(--bg)]',
+            'dash-body text-[var(--muted)] hover:border-[var(--border-hover)]',
+            'transition-colors duration-fast',
+          )}
+        >
+          <Search size={14} strokeWidth={1.5} className="flex-shrink-0" />
+          <span className="flex-1 text-left truncate">Search anything…</span>
+          <kbd className="dash-small-label text-[var(--subtle)]">⌘K</kbd>
+        </button>
 
-        <nav className="flex flex-col items-center gap-1.5" aria-label="Primary navigation">
-          <RailButton
-            icon={Layers}
-            label="Workspace"
-            href="/dashboard"
-            active={pathname === '/dashboard'}
-          />
-          <RailButton
-            icon={Activity}
-            label="Timeline"
-            href="/dashboard/timeline"
-            active={pathname === '/dashboard/timeline'}
-          />
-          <RailButton
-            icon={Zap}
-            label="Intelligence"
-            href="/dashboard/intelligence"
-            active={pathname === '/dashboard/intelligence'}
-          />
-          {hasAws && (
-            <RailButton
-              icon={Cloud}
-              label="AWS Accounts"
-              href="/dashboard/aws-accounts"
-              active={pathname === '/dashboard/aws-accounts'}
+        <nav className="flex flex-col gap-0.5 overflow-y-auto" aria-label="Primary navigation">
+          {primaryNav.map((item) => (
+            <NavItem
+              key={item.label}
+              icon={item.icon}
+              label={item.label}
+              href={item.href}
+              active={pathname === item.href}
+              disabled={item.disabled}
             />
+          ))}
+
+          {(hasAws || isAdmin) && (
+            <div className="w-full h-px bg-[var(--border-subtle)] my-2" />
+          )}
+
+          {hasAws && (
+            <NavItem icon={Cloud} label="AWS Accounts" href="/dashboard/aws-accounts" active={pathname === '/dashboard/aws-accounts'} />
           )}
           {isAdmin && (
-            <RailButton
-              icon={Shield}
-              label="Ops Dashboard"
-              href="/dashboard/ops"
-              active={pathname === '/dashboard/ops'}
-            />
+            <NavItem icon={Shield} label="Ops Dashboard" href="/dashboard/ops" active={pathname === '/dashboard/ops'} />
           )}
         </nav>
-
-        {/* Search trigger */}
-        <div className="flex flex-col items-center gap-1">
-          <RailButton icon={Command} label="Search (⌘K)" onClick={onSearch} />
-          <span className="type-label text-[var(--subtle)] opacity-50" style={{ fontSize: '9px' }}>⌘K</span>
-        </div>
       </div>
 
-      {/* Bottom: settings + user avatar + logout */}
-      <div className="flex flex-col items-center gap-1.5">
-        <RailButton
-          icon={Settings2}
-          label="Settings"
-          href="/dashboard/settings"
-          active={pathname === '/dashboard/settings'}
-        />
+      {/* Bottom: storage + profile */}
+      <div className="flex flex-col gap-3">
+        <NavItem icon={Settings2} label="Settings" href="/dashboard/settings" active={pathname === '/dashboard/settings'} />
 
-        <div className="w-5 h-px bg-[var(--border)] my-1" />
-
-        {/* User avatar */}
-        <div className="relative group">
-          <div
-            className={cn(
-              'flex items-center justify-center w-7 h-7 rounded-full cursor-default',
-              'bg-[var(--accent-dim)] border border-[var(--border)]',
-              'type-label text-[var(--accent)]',
-            )}
-            aria-label={user?.username || 'Profile'}
-          >
-            {initials}
+        {/* Storage widget */}
+        <div className="px-3 py-3 rounded-md border border-[var(--border)] bg-[var(--bg)]">
+          <div className="flex items-center gap-1.5 mb-2">
+            <HardDrive size={12} strokeWidth={1.5} className="text-[var(--subtle)]" />
+            <span className="dash-small-label text-[var(--muted)]">Storage used</span>
           </div>
-          {/* Username tooltip */}
-          {user?.username && (
-            <span
-              className={cn(
-                'absolute left-full ml-3 px-2 py-1',
-                'type-label text-[var(--text-2)] bg-[var(--surface-3)]',
-                'border border-[var(--border)] rounded',
-                'whitespace-nowrap pointer-events-none',
-                'opacity-0 group-hover:opacity-100',
-                'translate-x-1 group-hover:translate-x-0',
-                'transition-all duration-fast',
-                'z-tooltip',
-              )}
-            >
-              {user.username}
-            </span>
-          )}
+          <p className="dash-card-title text-[var(--text-2)] mb-1.5" style={{ fontSize: '18px' }}>2.34 TB <span className="dash-caption text-[var(--muted)]">/ 10 TB</span></p>
+          <div className="h-1 rounded-full bg-[var(--border)] overflow-hidden mb-2">
+            <div className="h-full bg-[var(--accent)] rounded-full" style={{ width: '23%' }} />
+          </div>
+          <Link href="/dashboard/settings" className="dash-button dash-caption text-[var(--accent)] hover:text-[var(--accent-warm)] transition-colors duration-fast">
+            Manage storage
+          </Link>
         </div>
 
-        {/* Logout */}
-        <RailButton icon={LogOut} label="Sign out" onClick={logout} />
+        {/* Profile row */}
+        <div className="relative" ref={menuRef}>
+          <button
+            onClick={() => setMenuOpen((v) => !v)}
+            className={cn(
+              'w-full flex items-center gap-2.5 px-2 py-2 rounded-md',
+              'hover:bg-[var(--surface-2)] transition-colors duration-fast',
+            )}
+          >
+            <div className="flex items-center justify-center w-7 h-7 rounded-full bg-[var(--accent-dim)] border border-[var(--border)] dash-caption text-[var(--accent)] flex-shrink-0">
+              {initials}
+            </div>
+            <div className="min-w-0 flex-1 text-left">
+              <p className="dash-sidebar text-[var(--text-2)] truncate leading-tight">{user?.username || '—'}</p>
+              <p className="dash-caption text-[var(--muted)] truncate">{user?.email || ''}</p>
+            </div>
+            <ChevronDown size={14} strokeWidth={1.5} className="text-[var(--subtle)] flex-shrink-0" />
+          </button>
+
+          {menuOpen && (
+            <div
+              className={cn(
+                'absolute bottom-full left-0 right-0 mb-2 p-1.5',
+                'bg-[var(--surface-3)] border border-[var(--border)] rounded-md',
+                'shadow-[var(--shadow-md)] z-tooltip',
+              )}
+            >
+              <button
+                onClick={toggle}
+                className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded dash-caption text-[var(--text-2)] hover:bg-[var(--surface-2)] transition-colors duration-fast"
+              >
+                {theme === 'dark' ? <Sun size={14} strokeWidth={1.5} /> : <Moon size={14} strokeWidth={1.5} />}
+                {theme === 'dark' ? 'Light mode' : 'Dark mode'}
+              </button>
+              <button
+                onClick={logout}
+                className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded dash-caption text-[var(--text-2)] hover:bg-[var(--surface-2)] transition-colors duration-fast"
+              >
+                <LogOut size={14} strokeWidth={1.5} />
+                Sign out
+              </button>
+            </div>
+          )}
+        </div>
       </div>
     </aside>
   )

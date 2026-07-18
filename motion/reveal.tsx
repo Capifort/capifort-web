@@ -15,20 +15,20 @@ interface RevealProps {
 
 const clipVariants: Record<Direction, Variants> = {
   up: {
-    hidden:  { clipPath: 'inset(100% 0 0 0)', opacity: 0 },
-    visible: { clipPath: 'inset(0% 0 0 0)',   opacity: 1 },
+    hidden:  { clipPath: 'inset(110% 0 -10% 0)', opacity: 0 },
+    visible: { clipPath: 'inset(-10% 0 -10% 0)',  opacity: 1 },
   },
   down: {
-    hidden:  { clipPath: 'inset(0 0 100% 0)', opacity: 0 },
-    visible: { clipPath: 'inset(0 0 0% 0)',   opacity: 1 },
+    hidden:  { clipPath: 'inset(-10% 0 110% 0)', opacity: 0 },
+    visible: { clipPath: 'inset(-10% 0 -10% 0)',  opacity: 1 },
   },
   left: {
-    hidden:  { clipPath: 'inset(0 0 0 100%)', opacity: 0 },
-    visible: { clipPath: 'inset(0 0 0 0%)',   opacity: 1 },
+    hidden:  { clipPath: 'inset(-10% 0 -10% 110%)', opacity: 0 },
+    visible: { clipPath: 'inset(-10% 0 -10% -10%)',  opacity: 1 },
   },
   right: {
-    hidden:  { clipPath: 'inset(0 100% 0 0)', opacity: 0 },
-    visible: { clipPath: 'inset(0 0% 0 0)',   opacity: 1 },
+    hidden:  { clipPath: 'inset(-10% 110% -10% 0)', opacity: 0 },
+    visible: { clipPath: 'inset(-10% -10% -10% 0)',  opacity: 1 },
   },
 }
 

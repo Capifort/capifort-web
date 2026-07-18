@@ -7,16 +7,16 @@ import { apiFetch, setStoredToken } from '@/lib/api'
 
 export interface Feature { key: string; name: string }
 export interface Plan { id: string; key: string; name: string; price_cents: number; billing_interval: string }
-export interface Organization { id: string; name: string }
+export interface Domain { id: string; name: string }
 
 export interface User {
   id: string
   username: string
   email: string
   role: string
-  entity_type: string
-  organization?: Organization
-  organization_id?: string
+  entity_type: 'business' | 'enterprise'
+  domain?: Domain
+  domain_id?: string
   permissions: Array<{ key: string; name: string }>
   features: Feature[]
   plan: Plan | null
@@ -31,14 +31,14 @@ interface AuthContextValue {
   features: Feature[]
   isAdmin: boolean
   hasFeature: (key: string) => boolean
-  refreshEntitlements: () => void
+  refreshAccess: () => void
   login: (username: string, password: string) => Promise<void>
   register: (
     username: string,
     email: string,
     password: string,
-    entityType?: string,
-    organizationName?: string,
+    entityType: 'business' | 'enterprise',
+    domainName: string,
   ) => Promise<void>
   logout: () => void
 }
@@ -77,8 +77,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, [])
 
-  const loadEntitlements = useCallback(async () => {
-    const data = await apiFetch('/api/me/entitlements')
+  const loadAccess = useCallback(async () => {
+    const data = await apiFetch('/api/access/me')
     setUser({
       ...data.user,
       permissions: data.permissions || [],
@@ -96,10 +96,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setLoading(false)
       return
     }
-    loadEntitlements()
+    loadAccess()
       .catch(() => setToken(null))
       .finally(() => setLoading(false))
-  }, [token, loadEntitlements, setToken])
+  }, [token, loadAccess, setToken])
 
   const login = async (username: string, password: string) => {
     const data = await apiFetch('/api/auth/login', {
@@ -107,24 +107,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       body: JSON.stringify({ username, password }),
     })
     setToken(data.access_token)
-    await loadEntitlements()
+    await loadAccess()
   }
 
   const register = async (
     username: string,
     email: string,
     password: string,
-    entityType = 'individual',
-    organizationName = '',
+    entityType: 'business' | 'enterprise',
+    domainName: string,
   ) => {
-    const body: Record<string, string> = { username, email, password, entity_type: entityType }
-    if (organizationName) body.organization_name = organizationName
+    const body = {
+      username,
+      email,
+      password,
+      entity_type: entityType,
+      domain_name: domainName,
+    }
     const data = await apiFetch('/api/auth/register', {
       method: 'POST',
       body: JSON.stringify(body),
     })
     setToken(data.access_token)
-    await loadEntitlements()
+    await loadAccess()
   }
 
   const logout = () => setToken(null)
@@ -134,14 +139,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     [features, isAdmin],
   )
 
-  const refreshEntitlements = useCallback(
-    () => loadEntitlements().catch(() => {}),
-    [loadEntitlements],
+  const refreshAccess = useCallback(
+    () => loadAccess().catch(() => {}),
+    [loadAccess],
   )
 
   return (
     <AuthContext.Provider
-      value={{ user, token, loading, plan, features, isAdmin, hasFeature, refreshEntitlements, login, register, logout }}
+      value={{ user, token, loading, plan, features, isAdmin, hasFeature, refreshAccess, login, register, logout }}
     >
       {children}
     </AuthContext.Provider>

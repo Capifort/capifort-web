@@ -6,15 +6,8 @@ import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { useAuth } from '@/context/auth-context'
 import { duration, ease } from '@/lib/tokens'
-import { cn } from '@/lib/cn'
-
-const ACCOUNT_TYPES = [
-  { value: 'individual', label: 'Individual' },
-  { value: 'organization', label: 'Organization' },
-]
 
 const ENTITY_TYPES = [
-  { value: 'individual', label: 'Individual' },
   { value: 'business', label: 'Business' },
   { value: 'enterprise', label: 'Enterprise' },
 ]
@@ -25,11 +18,10 @@ const inputCls =
   'focus:outline-none focus:border-[var(--border-focus)] transition-colors duration-fast'
 
 export default function RegisterPage() {
-  const [accountType, setAccountType] = useState<'individual' | 'organization'>('individual')
-  const [orgName, setOrgName]         = useState('')
+  const [domainName, setDomainName]   = useState('')
   const [username, setUsername]       = useState('')
   const [email, setEmail]             = useState('')
-  const [entityType, setEntityType]   = useState('individual')
+  const [entityType, setEntityType]   = useState<'business' | 'enterprise'>('business')
   const [password, setPassword]       = useState('')
   const [error, setError]             = useState('')
   const [submitting, setSubmitting]   = useState(false)
@@ -43,17 +35,14 @@ export default function RegisterPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (accountType === 'organization' && !orgName.trim()) {
-      setError('Organization name is required')
+    if (!domainName.trim()) {
+      setError('Domain name is required')
       return
     }
     setError('')
     setSubmitting(true)
     try {
-      await register(
-        username, email, password, entityType,
-        accountType === 'organization' ? orgName.trim() : '',
-      )
+      await register(username, email, password, entityType, domainName.trim())
       router.push('/dashboard')
     } catch (err: any) {
       setError(err.message || 'Registration failed. Please try again.')
@@ -98,7 +87,7 @@ export default function RegisterPage() {
               <span className="type-label text-[var(--accent)]">Create account</span>
             </div>
             <h1 className="type-headline mb-1.5">Join North</h1>
-            <p className="type-body-sm text-[var(--subtle)]">Select your account type to get started</p>
+            <p className="type-body-sm text-[var(--subtle)]">Set up your domain to get started</p>
           </div>
 
           {/* Error */}
@@ -115,47 +104,18 @@ export default function RegisterPage() {
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
 
-            {/* Account type toggle */}
+            {/* Domain name */}
             <div>
-              <label className="type-label text-[var(--muted)] block mb-1.5">Account Type</label>
-              <div className="flex rounded-md border border-[var(--border)] p-0.5 bg-[var(--surface)]">
-                {ACCOUNT_TYPES.map((opt) => (
-                  <button
-                    key={opt.value}
-                    type="button"
-                    onClick={() => setAccountType(opt.value as 'individual' | 'organization')}
-                    className={cn(
-                      'flex-1 py-2 rounded text-center type-body-sm transition-colors duration-fast',
-                      accountType === opt.value
-                        ? 'bg-[var(--surface-3)] text-[var(--text-2)] border border-[var(--border)]'
-                        : 'text-[var(--subtle)] hover:text-[var(--muted)]',
-                    )}
-                  >
-                    {opt.label}
-                  </button>
-                ))}
-              </div>
+              <label className="type-label text-[var(--muted)] block mb-1.5">Domain Name</label>
+              <input
+                type="text"
+                value={domainName}
+                onChange={(e) => setDomainName(e.target.value)}
+                required
+                placeholder="Your company or team name"
+                className={inputCls}
+              />
             </div>
-
-            {/* Org name (conditional) */}
-            {accountType === 'organization' && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                exit={{ opacity: 0, height: 0 }}
-                transition={{ duration: duration.fast, ease: ease.cinematic }}
-              >
-                <label className="type-label text-[var(--muted)] block mb-1.5">Organization Name</label>
-                <input
-                  type="text"
-                  value={orgName}
-                  onChange={(e) => setOrgName(e.target.value)}
-                  required
-                  placeholder="Your company or team name"
-                  className={inputCls}
-                />
-              </motion.div>
-            )}
 
             {/* Username */}
             <div>
@@ -191,7 +151,7 @@ export default function RegisterPage() {
               <label className="type-label text-[var(--muted)] block mb-1.5">Entity Type</label>
               <select
                 value={entityType}
-                onChange={(e) => setEntityType(e.target.value)}
+                onChange={(e) => setEntityType(e.target.value as 'business' | 'enterprise')}
                 className={`${inputCls} cursor-pointer`}
               >
                 {ENTITY_TYPES.map((opt) => (

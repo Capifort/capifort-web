@@ -1,6 +1,6 @@
 import { apiFetch } from './api'
 
-const BASE = '/api/admin'
+const BASE = '/api/access/admin'
 
 // ── Features ──────────────────────────────────────────────────────────────────
 

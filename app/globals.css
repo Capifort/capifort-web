@@ -344,6 +344,132 @@
 
 
 /* ═══════════════════════════════════════════════════════
+   DASHBOARD TYPOGRAPHY OVERRIDES
+   The product dashboard uses Inter Variable throughout —
+   one clean grotesque sans, no uppercase mono labels,
+   darker ink for secondary text than the editorial site.
+   ═══════════════════════════════════════════════════════ */
+
+  .dashboard-main {
+    font-family: 'Inter Variable', var(--font-inter), 'Inter', sans-serif;
+    font-optical-sizing: auto;
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+  }
+
+  .dashboard-main .type-display,
+  .dashboard-main .type-editorial,
+  .dashboard-main .type-statement,
+  .dashboard-main .type-headline,
+  .dashboard-main .type-title,
+  .dashboard-main .type-subtitle,
+  .dashboard-main .type-body,
+  .dashboard-main .type-body-sm {
+    font-family: inherit;
+  }
+
+  .dashboard-main .type-label {
+    font-family: inherit;
+    text-transform: none;
+    letter-spacing: var(--tracking-normal);
+    font-weight: 500;
+  }
+
+  .dashboard-main .type-mono,
+  .dashboard-main .type-mono-lg {
+    font-family: inherit;
+    letter-spacing: var(--tracking-normal);
+  }
+
+  /* ── Dashboard type scale ─────────────────────────────
+     Exact sizes/weights/tracking from the product spec.
+     Applied directly via className, independent of the
+     editorial type- classes above.
+     ─────────────────────────────────────────────────── */
+
+  .dashboard-main .dash-title {
+    font-size: 36px;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+  }
+
+  .dashboard-main .dash-page-title {
+    font-size: 32px;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+  }
+
+  .dashboard-main .dash-section {
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+  }
+
+  .dashboard-main .dash-card-title {
+    font-size: 18px;
+    font-weight: 600;
+    letter-spacing: -0.03em;
+    line-height: 1.35;
+  }
+
+  .dashboard-main .dash-metric {
+    font-size: 40px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+  }
+
+  .dashboard-main .dash-metric-label {
+    font-size: 15px;
+    font-weight: 500;
+    letter-spacing: 0;
+    line-height: 1.35;
+  }
+
+  .dashboard-main .dash-body {
+    font-size: 15px;
+    font-weight: 400;
+    letter-spacing: 0;
+    line-height: 1.5;
+  }
+
+  .dashboard-main .dash-sidebar {
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: 0;
+    line-height: 1.35;
+  }
+
+  .dashboard-main .dash-table {
+    font-size: 14px;
+    font-weight: 400;
+    letter-spacing: 0;
+    line-height: 1.35;
+  }
+
+  .dashboard-main .dash-caption {
+    font-size: 13px;
+    font-weight: 400;
+    letter-spacing: 0;
+    line-height: 1.35;
+  }
+
+  .dashboard-main .dash-small-label {
+    font-size: 12px;
+    font-weight: 400;
+    letter-spacing: 0;
+    line-height: 1.35;
+  }
+
+  .dashboard-main .dash-button {
+    font-weight: 500;
+    letter-spacing: -0.01em;
+  }
+
+
+/* ═══════════════════════════════════════════════════════
    UTILITIES LAYER — Atomic overrides
    ═══════════════════════════════════════════════════════ */
 

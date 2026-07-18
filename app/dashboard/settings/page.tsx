@@ -52,8 +52,8 @@ interface Member {
 // ── Members Tab ───────────────────────────────────────────────────────────────
 
 function MembersTab() {
-  const { user, refreshEntitlements } = useAuth()
-  const orgId = user?.organization_id || user?.organization?.id || null
+  const { user, refreshAccess } = useAuth()
+  const domainId = user?.domain_id || user?.domain?.id || null
 
   const [members, setMembers]           = useState<Member[]>([])
   const [loading, setLoading]           = useState(true)
@@ -67,16 +67,16 @@ function MembersTab() {
   const canManage = myMembership && (myMembership.role === 'owner' || myMembership.role === 'admin')
 
   const loadMembers = useCallback(async () => {
-    if (!orgId) { setLoading(false); return }
+    if (!domainId) { setLoading(false); return }
     try {
-      const data = await apiFetch(`/api/organizations/${orgId}/members`)
+      const data = await apiFetch(`/api/domains/${domainId}/members`)
       setMembers(data || [])
     } catch (e: any) {
       setError(e.message || 'Failed to load members')
     } finally {
       setLoading(false)
     }
-  }, [orgId])
+  }, [domainId])
 
   useEffect(() => { loadMembers() }, [loadMembers])
 
@@ -89,12 +89,12 @@ function MembersTab() {
     try {
       const body: Record<string, string> = { email: form.email.trim(), role: form.role }
       if (form.username.trim()) body.username = form.username.trim()
-      const res = await apiFetch(`/api/organizations/${orgId}/invitations`, { method: 'POST', body: JSON.stringify(body) })
+      const res = await apiFetch(`/api/domains/${domainId}/invitations`, { method: 'POST', body: JSON.stringify(body) })
       if (res?.created) {
         setTempPwd({ email: form.email.trim(), username: res.member?.username, temporary_password: res.temporary_password })
         setSuccess('User created and invited. Share the credentials securely.')
       } else {
-        setSuccess('Existing user added to your organization.')
+        setSuccess('Existing user added to your domain.')
       }
       setForm({ email: '', username: '', role: 'member' })
       await loadMembers()
@@ -106,28 +106,28 @@ function MembersTab() {
   const handleRoleChange = async (member: Member, role: string) => {
     clear()
     try {
-      await apiFetch(`/api/organizations/${orgId}/members/${member.user_id}`, { method: 'PATCH', body: JSON.stringify({ role }) })
+      await apiFetch(`/api/domains/${domainId}/members/${member.user_id}`, { method: 'PATCH', body: JSON.stringify({ role }) })
       setSuccess(`${member.username}'s role updated to ${role}.`)
       await loadMembers()
     } catch (e: any) { setError(e.message || 'Failed to update role') }
   }
 
   const handleRemove = async (member: Member) => {
-    if (!window.confirm(`Remove ${member.username} from this organization?`)) return
+    if (!window.confirm(`Remove ${member.username} from this domain?`)) return
     clear()
     try {
-      await apiFetch(`/api/organizations/${orgId}/members/${member.user_id}`, { method: 'DELETE' })
+      await apiFetch(`/api/domains/${domainId}/members/${member.user_id}`, { method: 'DELETE' })
       setSuccess(`${member.username} removed.`)
       await loadMembers()
-      if (member.user_id === user?.id) refreshEntitlements()
+      if (member.user_id === user?.id) refreshAccess()
     } catch (e: any) { setError(e.message || 'Failed to remove member') }
   }
 
-  if (!orgId) {
+  if (!domainId) {
     return (
       <SpatialPanel>
-        <Title as="h3" className="mb-3">No organization</Title>
-        <Body>You're not part of an organization yet. Register with an organization account to invite teammates.</Body>
+        <Title as="h3" className="mb-3">No domain</Title>
+        <Body>You're not part of a domain yet. Register to create one and invite teammates.</Body>
       </SpatialPanel>
     )
   }
@@ -262,7 +262,7 @@ export default function SettingsPage() {
       <div className="border-b border-[var(--border)] px-8 py-6">
         <FadeIn y={4}>
           <SystemLabel as="p" className="mb-1.5">Settings</SystemLabel>
-          <h1 className="type-headline text-[var(--text)]">Organization & Members</h1>
+          <h1 className="type-headline text-[var(--text)]">Domain & Members</h1>
         </FadeIn>
       </div>
       <Container className="py-10">

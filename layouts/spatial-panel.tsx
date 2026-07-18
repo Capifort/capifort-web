@@ -35,7 +35,7 @@ export function SpatialPanel({ children, glow = false, glass = false, className 
   )
 
   if (glow) {
-    return <AmbientGlow className={cn(glass ? 'rounded-md' : 'rounded')}>{panel}</AmbientGlow>
+    return <AmbientGlow className={cn(glass ? 'rounded-md' : 'rounded', className)}>{panel}</AmbientGlow>
   }
 
   return panel

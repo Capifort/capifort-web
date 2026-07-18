@@ -1,7 +1,8 @@
 import type { Metadata, Viewport } from 'next'
-import { Manrope, IBM_Plex_Mono } from 'next/font/google'
+import { Manrope, IBM_Plex_Mono, Inter } from 'next/font/google'
 import { SmoothScrollProvider } from '@/providers/smooth-scroll'
 import { AppAuthProvider } from '@/providers/auth-provider'
+import { ThemeProvider } from '@/context/theme-context'
 import './globals.css'
 
 const manrope = Manrope({
@@ -16,6 +17,13 @@ const ibmPlexMono = IBM_Plex_Mono({
   variable: '--font-ibm-plex-mono',
   display: 'swap',
   weight: ['400', '500'],
+})
+
+const inter = Inter({
+  subsets: ['latin'],
+  variable: '--font-inter',
+  display: 'swap',
+  weight: ['400', '500', '600', '700'],
 })
 
 export const metadata: Metadata = {
@@ -58,13 +66,15 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${manrope.variable} ${ibmPlexMono.variable}`}
+      className={`${manrope.variable} ${ibmPlexMono.variable} ${inter.variable}`}
       suppressHydrationWarning
     >
       <body>
-        <AppAuthProvider>
-          <SmoothScrollProvider>{children}</SmoothScrollProvider>
-        </AppAuthProvider>
+        <ThemeProvider>
+          <AppAuthProvider>
+            <SmoothScrollProvider>{children}</SmoothScrollProvider>
+          </AppAuthProvider>
+        </ThemeProvider>
       </body>
     </html>
   )
