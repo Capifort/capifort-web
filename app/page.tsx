@@ -6,32 +6,83 @@ import {
   BrainCircuit, Search, Zap, Wallet, Scale, Settings2, Users, TrendingUp,
   Cloud, ShieldCheck, KeyRound, FileClock, Lock, ServerCog, Blocks,
 } from 'lucide-react'
+import { BrandLogo, brandLabels, type BrandName } from '@/components/brand-logos'
 
-const connectSources = [
-  { icon: FileText, title: 'Documents', desc: 'PDF, DOCX, PPTX, XLSX, CSV, TXT, Markdown, Contracts, SOPs & more' },
-  { icon: Database, title: 'Databases', desc: 'PostgreSQL, MySQL, Snowflake, BigQuery, Redshift & more' },
-  { icon: AppWindow, title: 'Applications', desc: 'Slack, SharePoint, Confluence, Notion, Google Drive & more' },
-  { icon: Code2, title: 'Source Code', desc: 'Github, GitLab, Bitbucket, Internal Repos & Wikis' },
-  { icon: Globe, title: 'APIs & Web', desc: 'REST APIs, Webhooks, CRM, ERP & Custom Internal Tools' },
+const integrationCategories = [
+  {
+    icon: FileText,
+    title: 'Documents & Files',
+    logos: ['pdf', 'word', 'excel', 'powerpoint'] as BrandName[],
+    more: '40+ formats',
+    desc: 'Contracts, SOPs, policies, decks and spreadsheets, including scanned and handwritten files.',
+  },
+  {
+    icon: Database,
+    title: 'Databases & Warehouses',
+    logos: ['postgres', 'mysql', 'snowflake', 'bigquery'] as BrandName[],
+    more: 'Redshift',
+    desc: 'Query live operational and analytical data alongside your documents in one answer.',
+  },
+  {
+    icon: AppWindow,
+    title: 'Business Applications',
+    logos: ['slack', 'notion', 'confluence', 'drive'] as BrandName[],
+    more: '80+ apps',
+    desc: 'Every conversation, wiki page and shared drive your teams already work inside.',
+  },
+  {
+    icon: Code2,
+    title: 'Source Code & Wikis',
+    logos: ['github', 'gitlab', 'bitbucket'] as BrandName[],
+    more: 'Self hosted',
+    desc: 'Repositories, pull requests, runbooks and internal engineering documentation.',
+  },
+  {
+    icon: Cloud,
+    title: 'Cloud Storage',
+    logos: ['s3', 'azure', 'gcs', 'dropbox', 'box'] as BrandName[],
+    more: 'SFTP',
+    desc: 'Point Capifort at a bucket or folder and it stays continuously in sync.',
+  },
+  {
+    icon: Globe,
+    title: 'APIs & Core Systems',
+    logos: ['salesforce', 'sap', 'microsoft', 'rest'] as BrandName[],
+    more: 'Webhooks',
+    desc: 'CRM, ERP and custom internal services through a first class API and event stream.',
+  },
+]
+
+const integrationHighlights = [
+  { value: '200+', label: 'Prebuilt enterprise connectors' },
+  { value: '40+', label: 'Document and data formats' },
+  { value: 'Zero', label: 'Data migration required' },
+]
+
+const sourceLogoWall: BrandName[] = [
+  'pdf', 'word', 'excel', 'powerpoint', 'slack', 'notion', 'drive',
+  'confluence', 'github', 'postgres', 'snowflake', 'salesforce',
 ]
 
 const pipelineStages = [
-  { icon: Upload, label: 'Ingest' },
-  { icon: ScanText, label: 'OCR' },
-  { icon: FileText, label: 'Parse' },
-  { icon: Grid3x3, label: 'Chunk' },
-  { icon: Layers, label: 'Embed' },
-  { icon: Database, label: 'Index' },
-  { icon: Share2, label: 'Graph' },
-  { icon: Bot, label: 'Agents' },
+  { icon: Upload, label: 'Ingest', note: 'Batch and streaming' },
+  { icon: ScanText, label: 'OCR', note: 'Scans and images' },
+  { icon: FileText, label: 'Parse', note: 'Layout aware' },
+  { icon: Grid3x3, label: 'Chunk', note: 'Semantic splitting' },
+  { icon: Layers, label: 'Embed', note: 'Vector encoding' },
+  { icon: Database, label: 'Index', note: 'Hybrid retrieval' },
+  { icon: Share2, label: 'Graph', note: 'Entity linking' },
+  { icon: Bot, label: 'Agents', note: 'Tool execution' },
 ]
 
+const intelligenceCapabilities = ['Knowledge Graph', 'Semantic Search', 'AI Agents', 'Automation']
+
 const pipelineOutputs = [
-  { icon: Sparkles, label: 'Ask Questions' },
-  { icon: FileText, label: 'Generate Reports' },
-  { icon: Zap, label: 'Execute Workflows' },
-  { icon: Grid3x3, label: 'Create Dashboards' },
-  { icon: Search, label: 'Discover Insights' },
+  { icon: Sparkles, label: 'Ask Questions', desc: 'Cited answers in seconds' },
+  { icon: FileText, label: 'Generate Reports', desc: 'Board ready documents' },
+  { icon: Zap, label: 'Execute Workflows', desc: 'Actions across systems' },
+  { icon: Grid3x3, label: 'Create Dashboards', desc: 'Live operational views' },
+  { icon: Search, label: 'Discover Insights', desc: 'Risks and trends surfaced' },
 ]
 
 const capabilities = [
@@ -100,21 +151,47 @@ function Logo() {
   )
 }
 
-function Eyebrow({ children }: { children: string }) {
+function Eyebrow({ children, dark = false }: { children: string; dark?: boolean }) {
+  if (dark) {
+    return (
+      <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3.5 py-1.5 text-xs font-bold uppercase tracking-[0.18em] text-violet-200">
+        <span className="h-1.5 w-1.5 rounded-full bg-violet-400" />
+        {children}
+      </span>
+    )
+  }
   return (
-    <span className="inline-flex items-center gap-2 rounded-full border border-violet-100 bg-violet-50 px-3.5 py-1.5 text-xs font-bold uppercase tracking-wider text-violet-700">
+    <span className="inline-flex items-center gap-2 rounded-full border border-violet-100 bg-violet-50 px-3.5 py-1.5 text-xs font-bold uppercase tracking-[0.18em] text-violet-700">
       <span className="h-1.5 w-1.5 rounded-full bg-violet-600" />
       {children}
     </span>
   )
 }
 
-function SectionHeading({ eyebrow, title, subtitle }: { eyebrow: string; title: string; subtitle?: string }) {
+function SectionHeading({ eyebrow, title, subtitle, dark = false }: { eyebrow: string; title: string; subtitle?: string; dark?: boolean }) {
   return (
-    <div className="mx-auto max-w-2xl text-center">
-      <Eyebrow>{eyebrow}</Eyebrow>
-      <h2 className="mt-5 text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">{title}</h2>
-      {subtitle && <p className="mt-4 text-base leading-relaxed text-slate-500">{subtitle}</p>}
+    <div className="mx-auto max-w-3xl text-center">
+      <Eyebrow dark={dark}>{eyebrow}</Eyebrow>
+      <h2 className={`mt-6 text-4xl font-black leading-[1.1] tracking-tight sm:text-5xl ${dark ? 'text-white' : 'text-slate-900'}`}>
+        {title}
+      </h2>
+      {subtitle && (
+        <p className={`mx-auto mt-5 max-w-2xl text-base leading-relaxed sm:text-lg ${dark ? 'text-slate-400' : 'text-slate-500'}`}>
+          {subtitle}
+        </p>
+      )}
+    </div>
+  )
+}
+
+function LayerLabel({ step, title, note, dark = false }: { step: string; title: string; note: string; dark?: boolean }) {
+  return (
+    <div className="flex flex-wrap items-center gap-3">
+      <span className={`flex h-7 items-center rounded-md px-2 text-[11px] font-black tracking-widest ${dark ? 'bg-white/10 text-violet-200' : 'bg-slate-900 text-white'}`}>
+        {step}
+      </span>
+      <p className={`text-sm font-bold uppercase tracking-[0.14em] ${dark ? 'text-white' : 'text-slate-900'}`}>{title}</p>
+      <p className={`text-xs font-medium ${dark ? 'text-slate-400' : 'text-slate-500'}`}>{note}</p>
     </div>
   )
 }
@@ -208,22 +285,68 @@ export default function LandingPage() {
       </section>
 
       {/* Connect your enterprise knowledge */}
-      <section className="border-t border-slate-100 bg-slate-50 py-24">
-        <div className="mx-auto max-w-7xl px-6">
+      <section className="relative overflow-hidden bg-slate-950 py-28">
+        {/* Blueprint grid + halo: no stock Tailwind utility covers either, so both are inline */}
+        <div
+          className="pointer-events-none absolute inset-0 opacity-[0.06]"
+          style={{
+            backgroundImage:
+              'linear-gradient(to right, #fff 1px, transparent 1px), linear-gradient(to bottom, #fff 1px, transparent 1px)',
+            backgroundSize: '72px 72px',
+          }}
+          aria-hidden
+        />
+        <div
+          className="pointer-events-none absolute left-1/2 top-0 h-72 w-[60rem] -translate-x-1/2 rounded-full bg-violet-600/25 blur-[110px]"
+          aria-hidden
+        />
+
+        <div className="relative mx-auto max-w-7xl px-6">
           <SectionHeading
+            dark
             eyebrow="Integrations"
             title="Connect your enterprise knowledge"
-            subtitle="One knowledge layer across every system your company already uses — no migrations, no rip and replace."
+            subtitle="One knowledge layer across every system your company already uses. No migrations. No rip and replace."
           />
-          <div className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-5">
-            {connectSources.map(({ icon: Icon, title, desc }) => (
+
+          <div className="mt-14 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+            {integrationCategories.map(({ icon: Icon, title, logos, more, desc }) => (
               <div
                 key={title}
-                className="group rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:border-violet-200 hover:shadow-lg"
+                className="group rounded-2xl border border-white/10 bg-white/[0.04] p-7 transition hover:-translate-y-1 hover:border-violet-400/40 hover:bg-white/[0.07]"
               >
-                <IconBadge icon={Icon} />
-                <p className="mt-4 text-sm font-bold text-slate-900">{title}</p>
-                <p className="mt-1.5 text-xs leading-relaxed text-slate-500">{desc}</p>
+                <div className="flex items-center gap-3.5">
+                  <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-indigo-600 text-white shadow-lg shadow-violet-950/60">
+                    <Icon size={20} strokeWidth={2} />
+                  </div>
+                  <p className="text-base font-bold tracking-tight text-white">{title}</p>
+                </div>
+
+                <div className="mt-6 flex flex-wrap items-center gap-2.5">
+                  {logos.map((brand) => (
+                    <div
+                      key={brand}
+                      title={brandLabels[brand]}
+                      className="flex h-11 w-11 items-center justify-center rounded-xl bg-white shadow-md shadow-slate-950/40 ring-1 ring-white/10"
+                    >
+                      <BrandLogo brand={brand} className="h-[22px] w-[22px]" />
+                    </div>
+                  ))}
+                  <span className="flex h-11 items-center rounded-xl border border-dashed border-white/20 px-3 text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                    {more}
+                  </span>
+                </div>
+
+                <p className="mt-6 text-sm leading-relaxed text-slate-400">{desc}</p>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-6 grid gap-8 rounded-2xl border border-white/10 bg-gradient-to-br from-white/[0.07] to-transparent px-8 py-9 sm:grid-cols-3">
+            {integrationHighlights.map(({ value, label }) => (
+              <div key={label} className="text-center sm:text-left">
+                <p className="text-4xl font-black tracking-tight text-white">{value}</p>
+                <p className="mt-2 text-sm font-medium text-slate-400">{label}</p>
               </div>
             ))}
           </div>
@@ -231,41 +354,108 @@ export default function LandingPage() {
       </section>
 
       {/* AI Pipeline */}
-      <section className="py-24">
+      <section className="py-28">
         <div className="mx-auto max-w-7xl px-6">
           <SectionHeading
             eyebrow="Under the hood"
             title="The AI Pipeline"
-            subtitle="From raw files to answers — automatically, continuously, and at enterprise scale."
+            subtitle="From raw files to answers. Automatically, continuously, and at enterprise scale."
           />
 
-          <div className="relative mt-16 flex flex-wrap items-start justify-center gap-8 sm:gap-12">
-            <div className="pointer-events-none absolute left-0 right-0 top-6 hidden h-px bg-slate-200 sm:block" style={{ marginInline: '8%' }} aria-hidden />
-            {pipelineStages.map(({ icon: Icon, label }) => (
-              <div key={label} className="relative flex flex-col items-center gap-3">
-                <div className="flex h-12 w-12 items-center justify-center rounded-full border-2 border-slate-200 bg-white text-slate-600 shadow-sm">
-                  <Icon size={19} strokeWidth={1.9} />
-                </div>
-                <span className="text-xs font-semibold text-slate-500">{label}</span>
-              </div>
-            ))}
-          </div>
+          <div className="mt-16 space-y-5">
 
-          <div className="mx-auto mt-10 flex max-w-2xl items-center gap-4 rounded-2xl border border-violet-100 bg-gradient-to-br from-violet-50 to-indigo-50 px-7 py-5 shadow-sm">
-            <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-violet-600 to-indigo-600 font-black text-white shadow-md shadow-violet-600/20">N</div>
-            <div>
-              <p className="text-sm font-bold text-slate-900">Capifort Intelligence Layer</p>
-              <p className="text-xs text-slate-500">Knowledge Graph &middot; Semantic Search &middot; AI Agents &middot; Automation</p>
+            {/* Sources */}
+            <div className="rounded-3xl border border-slate-200 bg-slate-50 p-7 sm:p-8">
+              <LayerLabel step="01" title="Sources" note="200+ connectors, always in sync" />
+              <div className="mt-6 flex flex-wrap gap-3">
+                {sourceLogoWall.map((brand) => (
+                  <div
+                    key={brand}
+                    title={brandLabels[brand]}
+                    className="flex h-12 w-12 items-center justify-center rounded-xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+                  >
+                    <BrandLogo brand={brand} className="h-6 w-6" />
+                  </div>
+                ))}
+                <span className="flex h-12 items-center rounded-xl border border-dashed border-slate-300 px-4 text-xs font-bold uppercase tracking-wider text-slate-500">
+                  + 190 more
+                </span>
+              </div>
             </div>
-          </div>
 
-          <div className="mt-10 flex flex-wrap items-center justify-center gap-x-10 gap-y-4">
-            {pipelineOutputs.map(({ icon: Icon, label }) => (
-              <div key={label} className="flex items-center gap-2 text-sm font-semibold text-slate-600">
-                <Icon size={16} strokeWidth={1.9} className="text-violet-600" />
-                {label}
+            {/* Processing */}
+            <div className="rounded-3xl border border-slate-200 bg-white p-7 shadow-sm sm:p-8">
+              <LayerLabel step="02" title="Processing" note="Event driven and incremental, no full reindex" />
+              <div className="relative mt-7">
+                <div className="pointer-events-none absolute left-8 right-8 top-11 hidden h-0.5 bg-gradient-to-r from-violet-200 via-violet-400 to-indigo-300 lg:block" aria-hidden />
+                <div className="relative grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-8">
+                  {pipelineStages.map(({ icon: Icon, label, note }, i) => (
+                    <div
+                      key={label}
+                      className="relative rounded-2xl border border-slate-200 bg-white p-4 text-center shadow-sm transition hover:-translate-y-1 hover:border-violet-300 hover:shadow-lg"
+                    >
+                      <span className="absolute right-2.5 top-2 text-[10px] font-black text-slate-300">
+                        {String(i + 1).padStart(2, '0')}
+                      </span>
+                      <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-violet-600 to-indigo-600 text-white shadow-md shadow-violet-600/25">
+                        <Icon size={20} strokeWidth={2} />
+                      </div>
+                      <p className="mt-3.5 text-sm font-bold tracking-tight text-slate-900">{label}</p>
+                      <p className="mt-1 text-[11px] font-medium leading-snug text-slate-500">{note}</p>
+                    </div>
+                  ))}
+                </div>
               </div>
-            ))}
+            </div>
+
+            {/* Intelligence layer */}
+            <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900 via-slate-900 to-violet-950 p-7 shadow-xl shadow-slate-900/25 sm:p-8">
+              <div className="pointer-events-none absolute -right-16 -top-20 h-64 w-64 rounded-full bg-violet-500/25 blur-3xl" aria-hidden />
+              <div className="relative">
+                <LayerLabel step="03" title="Intelligence Layer" note="Where context is built and reasoning happens" dark />
+                <div className="mt-6 flex flex-wrap items-center gap-6">
+                  <div className="flex items-center gap-4">
+                    <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-500 to-indigo-600 text-white shadow-lg shadow-violet-950/60">
+                      <Compass size={26} strokeWidth={2.25} />
+                    </div>
+                    <div>
+                      <p className="text-xl font-black tracking-tight text-white">Capifort Intelligence Layer</p>
+                      <p className="mt-1 text-sm text-slate-400">One reasoning engine across every connected system</p>
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap gap-2.5 lg:ml-auto">
+                    {intelligenceCapabilities.map((capability) => (
+                      <span
+                        key={capability}
+                        className="rounded-full border border-white/15 bg-white/10 px-4 py-2 text-xs font-bold text-white"
+                      >
+                        {capability}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Activation */}
+            <div className="rounded-3xl border border-slate-200 bg-slate-50 p-7 sm:p-8">
+              <LayerLabel step="04" title="Activation" note="What your teams actually do with it" />
+              <div className="mt-6 grid gap-3 sm:grid-cols-3 lg:grid-cols-5">
+                {pipelineOutputs.map(({ icon: Icon, label, desc }) => (
+                  <div
+                    key={label}
+                    className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-1 hover:border-violet-300 hover:shadow-lg"
+                  >
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-50 text-violet-600 ring-1 ring-inset ring-violet-100">
+                      <Icon size={18} strokeWidth={2} />
+                    </div>
+                    <p className="mt-3.5 text-sm font-bold tracking-tight text-slate-900">{label}</p>
+                    <p className="mt-1 text-xs leading-relaxed text-slate-500">{desc}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
           </div>
         </div>
       </section>
@@ -317,7 +507,7 @@ export default function LandingPage() {
           <SectionHeading
             eyebrow="Onboarding"
             title="How Capifort works"
-            subtitle="Live in days, not months — with zero disruption to how your team already works."
+            subtitle="Live in days, not months, with zero disruption to how your team already works."
           />
           <div className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {howItWorks.map(({ icon: Icon, text }, i) => (
@@ -360,7 +550,7 @@ export default function LandingPage() {
           <SectionHeading
             eyebrow="Trust & security"
             title="Enterprise ready. By design."
-            subtitle="Security and compliance built in from day one — not bolted on later."
+            subtitle="Security and compliance built in from day one, not bolted on later."
           />
           <div className="mt-14 grid grid-cols-2 gap-4 sm:grid-cols-4 lg:grid-cols-8">
             {enterpriseBadges.map(({ icon: Icon, label }) => (
