@@ -1,336 +1,456 @@
-import { PageShell } from '@/layouts/page-shell'
-import { Container } from '@/layouts/container'
-import { SectionFrame } from '@/layouts/section-frame'
-import { SpatialPanel } from '@/layouts/spatial-panel'
-import { Hero } from '@/components/hero'
+import Link from 'next/link'
+import Image from 'next/image'
 import {
-  Display,
-  SystemLabel,
-  Body,
-  Title,
-  MonoMeta,
-} from '@/components/typography'
-import { FadeIn, Stagger, StaggerItem, Reveal } from '@/motion'
+  Compass, ChevronDown, FileText, Database, AppWindow, Code2, Globe,
+  Upload, ScanText, Grid3x3, Layers, Share2, Bot, Sparkles,
+  BrainCircuit, Search, Zap, Wallet, Scale, Settings2, Users, TrendingUp,
+  Cloud, ShieldCheck, KeyRound, FileClock, Lock, ServerCog, Blocks,
+} from 'lucide-react'
 
-const philosophy = [
-  {
-    label: '01',
-    title: 'Operational Clarity',
-    body: 'North gives teams one unified place to access organizational knowledge, decisions, workflows, and context — without switching across disconnected tools.',
-    icon: (
-      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 text-[var(--accent)]">
-        <path d="M2 10l8-4.5 8 4.5-8 4.5L2 10z" />
-        <path d="M2 13.5l8 4.5 8-4.5" />
-        <path d="M2 6.5l8 4.5 8-4.5" />
-      </svg>
-    ),
-  },
-  {
-    label: '02',
-    title: 'Knowledge That Compounds',
-    body: 'Every interaction, document, workflow, and decision strengthens organizational memory — making the company smarter over time.',
-    icon: (
-      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 text-[var(--accent)]">
-        <path d="M3 15l4.5-5 3 3 4.5-5.5" />
-        <path d="M13 7.5h3.5V11" />
-      </svg>
-    ),
-  },
-  {
-    label: '03',
-    title: 'Collective Intelligence',
-    body: 'North transforms fragmented information into a continuously evolving knowledge graph that helps teams coordinate, operate, and make better decisions together.',
-    icon: (
-      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 text-[var(--accent)]">
-        <circle cx="10" cy="10" r="2.25" />
-        <circle cx="3.5" cy="4.5" r="1.5" />
-        <circle cx="16.5" cy="4.5" r="1.5" />
-        <circle cx="10" cy="17.5" r="1.5" />
-        <line x1="9" y1="8.1" x2="4.8" y2="5.6" />
-        <line x1="11" y1="8.1" x2="15.2" y2="5.6" />
-        <line x1="10" y1="12.25" x2="10" y2="16" />
-      </svg>
-    ),
-  },
+const connectSources = [
+  { icon: FileText, title: 'Documents', desc: 'PDF, DOCX, PPTX, XLSX, CSV, TXT, Markdown, Contracts, SOPs & more' },
+  { icon: Database, title: 'Databases', desc: 'PostgreSQL, MySQL, Snowflake, BigQuery, Redshift & more' },
+  { icon: AppWindow, title: 'Applications', desc: 'Slack, SharePoint, Confluence, Notion, Google Drive & more' },
+  { icon: Code2, title: 'Source Code', desc: 'Github, GitLab, Bitbucket, Internal Repos & Wikis' },
+  { icon: Globe, title: 'APIs & Web', desc: 'REST APIs, Webhooks, CRM, ERP & Custom Internal Tools' },
 ]
 
-const architecture = [
-  {
-    title: 'Upload Documents',
-    icon: (
-      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 text-[var(--accent)]">
-        <path d="M10 13V4M7 7l3-3 3 3" />
-        <path d="M4 14v2a1 1 0 001 1h10a1 1 0 001-1v-2" />
-      </svg>
-    ),
-  },
-  {
-    title: 'Extract Organizational Knowledge',
-    icon: (
-      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 text-[var(--accent)]">
-        <circle cx="9" cy="9" r="5" />
-        <path d="M15.5 15.5l-3-3" />
-        <path d="M7 9h4M9 7v4" />
-      </svg>
-    ),
-  },
-  {
-    title: 'Auto-Connect Teams & Context',
-    icon: (
-      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 text-[var(--accent)]">
-        <circle cx="4.5" cy="10" r="2" />
-        <circle cx="15.5" cy="10" r="2" />
-        <path d="M6.5 10h7" />
-        <path d="M10 4.5v11" strokeDasharray="2 2" />
-      </svg>
-    ),
-  },
-  {
-    title: 'Build Dynamic Knowledge Graphs',
-    icon: (
-      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 text-[var(--accent)]">
-        <circle cx="10" cy="10" r="2" />
-        <circle cx="4" cy="5" r="1.5" />
-        <circle cx="16" cy="5" r="1.5" />
-        <circle cx="4" cy="15" r="1.5" />
-        <circle cx="16" cy="15" r="1.5" />
-        <line x1="8.3" y1="8.7" x2="5.3" y2="6.3" />
-        <line x1="11.7" y1="8.7" x2="14.7" y2="6.3" />
-        <line x1="8.3" y1="11.3" x2="5.3" y2="13.7" />
-        <line x1="11.7" y1="11.3" x2="14.7" y2="13.7" />
-      </svg>
-    ),
-  },
-  {
-    title: 'Search Institutional Memory',
-    icon: (
-      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 text-[var(--accent)]">
-        <circle cx="9" cy="9" r="5" />
-        <path d="M15.5 15.5l-3-3" />
-        <path d="M9 6.5v3l1.5 1.5" />
-      </svg>
-    ),
-  },
-  {
-    title: 'Coordinate Operational Workflows',
-    icon: (
-      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 text-[var(--accent)]">
-        <rect x="3" y="4" width="5" height="3.5" rx="0.75" />
-        <rect x="12" y="4" width="5" height="3.5" rx="0.75" />
-        <rect x="7.5" y="12.5" width="5" height="3.5" rx="0.75" />
-        <path d="M5.5 7.5v2.5h4.5v2.5" />
-        <path d="M14.5 7.5v2.5h-4.5" />
-      </svg>
-    ),
-  },
-  {
-    title: 'Generate AI-Powered Insights',
-    icon: (
-      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 text-[var(--accent)]">
-        <path d="M10 3v2M10 15v2M3 10h2M15 10h2" />
-        <path d="M5.6 5.6l1.4 1.4M13 13l1.4 1.4M5.6 14.4l1.4-1.4M13 7l1.4-1.4" />
-        <circle cx="10" cy="10" r="3" />
-      </svg>
-    ),
-  },
-  {
-    title: 'Continuously Evolve Company Intelligence',
-    icon: (
-      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 text-[var(--accent)]">
-        <path d="M4.5 10a5.5 5.5 0 0110.7-1.7" />
-        <path d="M15.5 10a5.5 5.5 0 01-10.7 1.7" />
-        <path d="M13.5 6.5l1.7 1.8-1.8 1.7" />
-        <path d="M6.5 13.5l-1.7-1.8 1.8-1.7" />
-      </svg>
-    ),
-  },
+const pipelineStages = [
+  { icon: Upload, label: 'Ingest' },
+  { icon: ScanText, label: 'OCR' },
+  { icon: FileText, label: 'Parse' },
+  { icon: Grid3x3, label: 'Chunk' },
+  { icon: Layers, label: 'Embed' },
+  { icon: Database, label: 'Index' },
+  { icon: Share2, label: 'Graph' },
+  { icon: Bot, label: 'Agents' },
 ]
 
-export default function Home() {
+const pipelineOutputs = [
+  { icon: Sparkles, label: 'Ask Questions' },
+  { icon: FileText, label: 'Generate Reports' },
+  { icon: Zap, label: 'Execute Workflows' },
+  { icon: Grid3x3, label: 'Create Dashboards' },
+  { icon: Search, label: 'Discover Insights' },
+]
+
+const capabilities = [
+  { icon: BrainCircuit, title: 'Organizational Memory', desc: 'Capture decades of knowledge from every source and make it instantly discoverable.' },
+  { icon: Bot, title: 'AI Agents', desc: 'Agents that understand your business context and take actions across systems.' },
+  { icon: Search, title: 'Enterprise Search', desc: 'Hybrid search across structured and unstructured data with semantic understanding.' },
+  { icon: Zap, title: 'Automation', desc: 'Trigger workflows, approvals, and operations from natural language.' },
+]
+
+const functions = [
+  { icon: Wallet, label: 'Finance' },
+  { icon: Scale, label: 'Legal' },
+  { icon: Settings2, label: 'Operations' },
+  { icon: Users, label: 'HR' },
+  { icon: TrendingUp, label: 'Sales' },
+  { icon: Code2, label: 'Engineering' },
+]
+
+const howItWorks = [
+  { icon: Cloud, text: 'Connect your existing systems and data sources in minutes.' },
+  { icon: Share2, text: 'Capifort builds your enterprise knowledge graph and understands relationships.' },
+  { icon: Sparkles, text: 'AI understands context across everything your organization knows.' },
+  { icon: Zap, text: 'Employees search, automate, and execute work with confidence.' },
+]
+
+const sampleQuestions = [
+  'Summarize all vendor contracts expiring next quarter.',
+  'Show revenue trends across Europe since 2023.',
+  'Create an executive report for last month’s incidents.',
+  'Which SOP changed after the last audit?',
+]
+
+const enterpriseBadges = [
+  { icon: Users, label: 'Role Based Access' },
+  { icon: KeyRound, label: 'SSO & SAML' },
+  { icon: FileClock, label: 'Audit Logs' },
+  { icon: Lock, label: 'Encryption In Transit & At Rest' },
+  { icon: ShieldCheck, label: 'SOC 2 Ready' },
+  { icon: ServerCog, label: 'Private Deployment' },
+  { icon: Code2, label: 'API First' },
+  { icon: Blocks, label: 'Scalable Architecture' },
+]
+
+const stats = [
+  { value: '90%', label: 'less time searching for information' },
+  { value: '3x', label: 'faster decision making' },
+  { value: '100M+', label: 'documents processed every day' },
+  { value: '99.9%', label: 'platform uptime SLA' },
+]
+
+const footerColumns = [
+  { title: 'Product', links: ['Features', 'Integrations', 'Security', 'Roadmap'] },
+  { title: 'Solutions', links: ['Finance', 'Legal', 'Operations', 'Engineering', 'HR', 'Sales'] },
+  { title: 'Resources', links: ['Documentation', 'Blog', 'Case Studies', 'Help Center'] },
+  { title: 'Company', links: ['About Us', 'Careers', 'Partners', 'Contact'] },
+]
+
+function Logo() {
   return (
-    <PageShell>
+    <Link href="/" className="flex items-center gap-2.5 font-extrabold tracking-tight text-slate-900">
+      <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-violet-600 to-indigo-600 text-white shadow-md shadow-violet-600/20">
+        <Compass size={17} strokeWidth={2.25} />
+      </span>
+      CAPIFORT
+    </Link>
+  )
+}
 
-      {/* ── Hero ────────────────────────────────────────── */}
-      <Hero />
+function Eyebrow({ children }: { children: string }) {
+  return (
+    <span className="inline-flex items-center gap-2 rounded-full border border-violet-100 bg-violet-50 px-3.5 py-1.5 text-xs font-bold uppercase tracking-wider text-violet-700">
+      <span className="h-1.5 w-1.5 rounded-full bg-violet-600" />
+      {children}
+    </span>
+  )
+}
 
-      {/* ── Philosophy ──────────────────────────────────── */}
-      <SectionFrame id="philosophy">
-        <Container>
+function SectionHeading({ eyebrow, title, subtitle }: { eyebrow: string; title: string; subtitle?: string }) {
+  return (
+    <div className="mx-auto max-w-2xl text-center">
+      <Eyebrow>{eyebrow}</Eyebrow>
+      <h2 className="mt-5 text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">{title}</h2>
+      {subtitle && <p className="mt-4 text-base leading-relaxed text-slate-500">{subtitle}</p>}
+    </div>
+  )
+}
 
-          <FadeIn>
-            <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-10 mb-16">
-              <div>
-                <SystemLabel as="p" className="mb-5 text-[var(--accent)]">
-                  Philosophy
-                </SystemLabel>
-                <Display as="h2" className="max-w-2xl [font-size:clamp(var(--text-2xl),3.5vw,var(--text-4xl))]">
-                  Every organization deserves a brain.
-                </Display>
-              </div>
-              <Body className="max-w-sm lg:pt-[3.75rem]">
-                Three core principles that govern how we think about organizational
-                knowledge and why it changes everything.
-              </Body>
-            </div>
-          </FadeIn>
+function IconBadge({ icon: Icon }: { icon: React.ElementType }) {
+  return (
+    <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-violet-50 text-violet-600 ring-1 ring-inset ring-violet-100">
+      <Icon size={19} strokeWidth={1.9} />
+    </div>
+  )
+}
 
-          <Stagger className="grid md:grid-cols-3 gap-4">
-            {philosophy.map((item) => (
-              <StaggerItem key={item.label} className="h-full">
-                <div className="hover:-translate-y-1.5 transition-transform duration-slow ease-cinematic h-full">
-                  <SpatialPanel glow className="h-full flex flex-col justify-between min-h-[280px]">
-                    <div>
-                      <div className="flex items-start justify-between mb-8">
-                        <div className="w-10 h-10 rounded-lg border border-[var(--border)] bg-[var(--accent-dim)] flex items-center justify-center">
-                          {item.icon}
-                        </div>
-                        <MonoMeta className="text-[var(--subtle)]">{item.label}</MonoMeta>
-                      </div>
-                      <Title as="h3" className="mb-4">{item.title}</Title>
-                      <Body className="leading-relaxed">{item.body}</Body>
-                    </div>
-                    <div className="mt-8 h-px bg-[var(--border)]" />
-                  </SpatialPanel>
-                </div>
-              </StaggerItem>
-            ))}
-          </Stagger>
+export default function LandingPage() {
+  return (
+    <div className="min-h-dvh bg-white text-slate-900">
 
-        </Container>
-      </SectionFrame>
-
-      {/* ── Divider ─────────────────────────────────────── */}
-      <Container>
-        <div className="h-px bg-[var(--border-subtle)]" />
-      </Container>
-
-      {/* ── Architecture ────────────────────────────────── */}
-      <SectionFrame id="architecture">
-        <Container>
-
-          <FadeIn>
-            <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-10 mb-16">
-              <div>
-                <SystemLabel as="p" className="mb-5 text-[var(--accent)]">
-                  Architecture
-                </SystemLabel>
-                <Display as="h2" className="max-w-2xl [font-size:clamp(var(--text-2xl),3.5vw,var(--text-4xl))]">
-                  From fragmented information<br />to organizational intelligence.
-                </Display>
-              </div>
-              <Body className="max-w-sm lg:pt-[3.75rem]">
-                One intelligent interface for capturing knowledge, retrieving context,
-                onboarding teams, and making decisions together.
-              </Body>
-            </div>
-          </FadeIn>
-
-          <Stagger className="grid lg:grid-cols-4 md:grid-cols-2 gap-3">
-            {architecture.map((item) => (
-              <StaggerItem key={item.title}>
-                <div className="group surface border-lift rounded-md p-7 hover:bg-[var(--surface-2)] transition-colors duration-fast cursor-default min-h-[210px] flex flex-col justify-between">
-                  <div className="w-10 h-10 rounded-md border border-[var(--border)] bg-[var(--accent-dim)] flex items-center justify-center opacity-60 group-hover:opacity-100 transition-opacity duration-fast">
-                    {item.icon}
-                  </div>
-                  <Title as="h3" className="mt-auto leading-snug">
-                    {item.title}
-                  </Title>
-                </div>
-              </StaggerItem>
-            ))}
-          </Stagger>
-
-        </Container>
-      </SectionFrame>
-
-      {/* ── Divider ─────────────────────────────────────── */}
-      <Container>
-        <div className="h-px bg-[var(--border-subtle)]" />
-      </Container>
-
-      {/* ── Vision ──────────────────────────────────────── */}
-      <SectionFrame id="vision" size="md">
-        <Container>
-
-          {/* Eyebrow — label + extending rule */}
-          <FadeIn y={0} dur={0.5} className="flex items-center gap-5 mb-10 lg:mb-12">
-            <SystemLabel as="p" className="text-[var(--accent)] flex-shrink-0">
-              Vision
-            </SystemLabel>
-            <div className="h-px flex-1 bg-[var(--border-subtle)]" aria-hidden />
-          </FadeIn>
-
-          {/* Headline — three lines, each clip-revealed individually */}
-          <div className="mb-10 lg:mb-14">
-            <Reveal direction="up" delay={0.05} dur={1.1}>
-              <Display as="p" className="[font-size:clamp(var(--text-3xl),5.5vw,var(--text-5xl))]">The next generation</Display>
-            </Reveal>
-            <Reveal direction="up" delay={0.18} dur={1.1}>
-              <Display as="p" className="[font-size:clamp(var(--text-3xl),5.5vw,var(--text-5xl))]">of organizations</Display>
-            </Reveal>
-            <Reveal direction="up" delay={0.31} dur={1.1}>
-              <Display as="p" className="[font-size:clamp(var(--text-3xl),5.5vw,var(--text-5xl))]">will think collectively.</Display>
-            </Reveal>
+      {/* Nav */}
+      <header className="sticky top-0 z-30 border-b border-slate-100 bg-white/85 backdrop-blur-md">
+        <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-6">
+          <Logo />
+          <nav className="hidden items-center gap-8 text-sm font-medium text-slate-600 lg:flex">
+            <Link href="#" className="transition-colors hover:text-slate-900">Product</Link>
+            <span className="flex cursor-default items-center gap-1 transition-colors hover:text-slate-900">Solutions <ChevronDown size={14} /></span>
+            <span className="flex cursor-default items-center gap-1 transition-colors hover:text-slate-900">Resources <ChevronDown size={14} /></span>
+            <Link href="#" className="transition-colors hover:text-slate-900">Pricing</Link>
+            <span className="flex cursor-default items-center gap-1 transition-colors hover:text-slate-900">Company <ChevronDown size={14} /></span>
+          </nav>
+          <div className="flex items-center gap-5">
+            <Link href="/login" className="text-sm font-semibold text-slate-600 hover:text-slate-900">Log in</Link>
+            <Link
+              href="/login"
+              className="rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white shadow-sm shadow-slate-900/10 transition hover:bg-slate-800 hover:shadow-md"
+            >
+              Request Demo
+            </Link>
           </div>
+        </div>
+      </header>
 
-          {/* Rule + content */}
-          <div className="border-t border-[var(--border-subtle)] pt-10 lg:pt-14">
-            <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-10 lg:gap-20">
+      {/* Hero */}
+      <section className="relative overflow-hidden">
+        <div className="pointer-events-none absolute -left-32 -top-32 h-96 w-96 rounded-full bg-violet-200/40 blur-3xl" aria-hidden />
+        <div className="pointer-events-none absolute -right-24 top-40 h-80 w-80 rounded-full bg-indigo-200/40 blur-3xl" aria-hidden />
 
-              {/* Body — left */}
-              <FadeIn delay={0.35} y={12}>
-                <div className="space-y-5 max-w-xl">
-                  <p className="type-subtitle text-[var(--text-2)]">
-                    The future of work is not more dashboards.
-                  </p>
-                  <Body>
-                    It is organizations that remember, reason, coordinate, and
-                    evolve intelligently. North is building the operating system
-                    for organizational knowledge.
-                  </Body>
-                </div>
-              </FadeIn>
-
-              {/* CTA — right */}
-              <FadeIn delay={0.5} y={8}>
-                <button className="group flex items-center gap-2.5 type-body-sm text-[var(--text-2)] hover:text-[var(--accent)] transition-colors duration-fast whitespace-nowrap">
-                  <span>Build with North</span>
-                  <span
-                    className="inline-block group-hover:translate-x-1.5 transition-transform duration-fast"
-                    aria-hidden
-                  >
-                    →
-                  </span>
-                </button>
-              </FadeIn>
-
-            </div>
-          </div>
-
-        </Container>
-      </SectionFrame>
-
-      {/* ── Footer ──────────────────────────────────────── */}
-      <footer className="border-t border-[var(--border-subtle)] py-10">
-        <Container>
-          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+        <div className="relative mx-auto max-w-7xl px-6 py-20 lg:py-28">
+          <div className="grid items-center gap-16 lg:grid-cols-2">
             <div>
-              <p className="type-label text-[var(--accent)] mb-2">NORTH</p>
-              <p className="type-body-sm text-[var(--subtle)]">
-                The Operating System For Organizational Knowledge.
+              <Eyebrow>AI-native operating system for work</Eyebrow>
+              <h1 className="mt-7 text-5xl font-black leading-[1.05] tracking-tight text-slate-900 sm:text-6xl">
+                AI Operating System<br />for Enterprise<br />
+                <span className="bg-gradient-to-r from-violet-600 to-indigo-600 bg-clip-text text-transparent">Intelligence</span>
+              </h1>
+              <p className="mt-7 max-w-lg text-lg leading-relaxed text-slate-500">
+                Capifort connects every source of your organizational knowledge, understands it deeply,
+                and helps your team search, reason, automate, and execute with confidence.
+              </p>
+              <div className="mt-9 flex flex-wrap items-center gap-3">
+                <Link
+                  href="/login"
+                  className="rounded-xl bg-slate-900 px-6 py-3.5 text-sm font-bold text-white shadow-lg shadow-slate-900/20 transition hover:-translate-y-0.5 hover:bg-slate-800 hover:shadow-xl"
+                >
+                  Book a Demo &rarr;
+                </Link>
+                <button className="rounded-xl border-2 border-slate-200 px-6 py-3.5 text-sm font-bold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50">
+                  Watch 2 min Overview
+                </button>
+              </div>
+              <div className="mt-16">
+                <p className="text-xs font-bold uppercase tracking-wider text-slate-400">Trusted by forward-thinking companies</p>
+                <div className="mt-5 flex flex-wrap items-center gap-x-8 gap-y-3 text-slate-400">
+                  {['Ramp', 'Brex', 'Mercury', 'Vanta', 'Notion', 'Rippling'].map((name) => (
+                    <span key={name} className="text-sm font-bold">{name}</span>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="relative">
+              <div className="pointer-events-none absolute inset-0 -z-10 rounded-full bg-gradient-to-br from-violet-100 via-white to-transparent blur-2xl" aria-hidden />
+              <Image
+                src="/hero-orbit.png"
+                alt="Capifort knowledge graph connecting Slack, Google Drive, Excel, Word, Teams, Notion and other enterprise sources"
+                width={1402}
+                height={1122}
+                priority
+                className="h-auto w-full drop-shadow-2xl"
+              />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Connect your enterprise knowledge */}
+      <section className="border-t border-slate-100 bg-slate-50 py-24">
+        <div className="mx-auto max-w-7xl px-6">
+          <SectionHeading
+            eyebrow="Integrations"
+            title="Connect your enterprise knowledge"
+            subtitle="One knowledge layer across every system your company already uses — no migrations, no rip and replace."
+          />
+          <div className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-5">
+            {connectSources.map(({ icon: Icon, title, desc }) => (
+              <div
+                key={title}
+                className="group rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:border-violet-200 hover:shadow-lg"
+              >
+                <IconBadge icon={Icon} />
+                <p className="mt-4 text-sm font-bold text-slate-900">{title}</p>
+                <p className="mt-1.5 text-xs leading-relaxed text-slate-500">{desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* AI Pipeline */}
+      <section className="py-24">
+        <div className="mx-auto max-w-7xl px-6">
+          <SectionHeading
+            eyebrow="Under the hood"
+            title="The AI Pipeline"
+            subtitle="From raw files to answers — automatically, continuously, and at enterprise scale."
+          />
+
+          <div className="relative mt-16 flex flex-wrap items-start justify-center gap-8 sm:gap-12">
+            <div className="pointer-events-none absolute left-0 right-0 top-6 hidden h-px bg-slate-200 sm:block" style={{ marginInline: '8%' }} aria-hidden />
+            {pipelineStages.map(({ icon: Icon, label }) => (
+              <div key={label} className="relative flex flex-col items-center gap-3">
+                <div className="flex h-12 w-12 items-center justify-center rounded-full border-2 border-slate-200 bg-white text-slate-600 shadow-sm">
+                  <Icon size={19} strokeWidth={1.9} />
+                </div>
+                <span className="text-xs font-semibold text-slate-500">{label}</span>
+              </div>
+            ))}
+          </div>
+
+          <div className="mx-auto mt-10 flex max-w-2xl items-center gap-4 rounded-2xl border border-violet-100 bg-gradient-to-br from-violet-50 to-indigo-50 px-7 py-5 shadow-sm">
+            <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-violet-600 to-indigo-600 font-black text-white shadow-md shadow-violet-600/20">N</div>
+            <div>
+              <p className="text-sm font-bold text-slate-900">Capifort Intelligence Layer</p>
+              <p className="text-xs text-slate-500">Knowledge Graph &middot; Semantic Search &middot; AI Agents &middot; Automation</p>
+            </div>
+          </div>
+
+          <div className="mt-10 flex flex-wrap items-center justify-center gap-x-10 gap-y-4">
+            {pipelineOutputs.map(({ icon: Icon, label }) => (
+              <div key={label} className="flex items-center gap-2 text-sm font-semibold text-slate-600">
+                <Icon size={16} strokeWidth={1.9} className="text-violet-600" />
+                {label}
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Everything your team can do */}
+      <section className="border-t border-slate-100 bg-slate-50 py-24">
+        <div className="mx-auto max-w-7xl px-6">
+          <SectionHeading
+            eyebrow="Capabilities"
+            title="Everything your team can do with Capifort"
+            subtitle="A single intelligence layer that captures, understands, and acts on everything your company knows."
+          />
+          <div className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            {capabilities.map(({ icon: Icon, title, desc }) => (
+              <div
+                key={title}
+                className="group rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:border-violet-200 hover:shadow-lg"
+              >
+                <IconBadge icon={Icon} />
+                <p className="mt-4 text-sm font-bold text-slate-900">{title}</p>
+                <p className="mt-1.5 text-xs leading-relaxed text-slate-500">{desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Built for every function */}
+      <section className="py-24">
+        <div className="mx-auto max-w-7xl px-6">
+          <SectionHeading eyebrow="Every team" title="Built for every function" />
+          <div className="mt-10 flex flex-wrap justify-center gap-3.5">
+            {functions.map(({ icon: Icon, label }) => (
+              <span
+                key={label}
+                className="flex items-center gap-2.5 rounded-full border border-slate-200 bg-white px-5 py-2.5 text-sm font-bold text-slate-700 shadow-sm transition hover:-translate-y-0.5 hover:border-violet-200 hover:shadow-md"
+              >
+                <Icon size={16} strokeWidth={1.9} className="text-violet-600" />
+                {label}
+              </span>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* How Capifort works */}
+      <section className="border-t border-slate-100 bg-slate-50 py-24">
+        <div className="mx-auto max-w-7xl px-6">
+          <SectionHeading
+            eyebrow="Onboarding"
+            title="How Capifort works"
+            subtitle="Live in days, not months — with zero disruption to how your team already works."
+          />
+          <div className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            {howItWorks.map(({ icon: Icon, text }, i) => (
+              <div
+                key={i}
+                className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:border-violet-200 hover:shadow-lg"
+              >
+                <div className="flex items-center justify-between">
+                  <IconBadge icon={Icon} />
+                  <span className="flex h-7 w-7 items-center justify-center rounded-full bg-slate-900 text-xs font-bold text-white">{i + 1}</span>
+                </div>
+                <p className="mt-4 text-sm leading-relaxed text-slate-600">{text}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Ask anything */}
+      <section className="py-24">
+        <div className="mx-auto max-w-7xl px-6">
+          <SectionHeading eyebrow="Search & reasoning" title="Ask anything. Get reliable answers." />
+          <div className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            {sampleQuestions.map((q) => (
+              <div
+                key={q}
+                className="rounded-2xl border border-slate-200 bg-white p-6 text-sm text-slate-700 shadow-sm transition hover:-translate-y-1 hover:border-violet-200 hover:shadow-lg"
+              >
+                <span className="text-3xl font-black leading-none text-violet-200">&ldquo;</span>
+                <p className="mt-2 font-medium leading-relaxed">{q}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Enterprise ready */}
+      <section className="border-t border-slate-100 bg-slate-50 py-24">
+        <div className="mx-auto max-w-7xl px-6">
+          <SectionHeading
+            eyebrow="Trust & security"
+            title="Enterprise ready. By design."
+            subtitle="Security and compliance built in from day one — not bolted on later."
+          />
+          <div className="mt-14 grid grid-cols-2 gap-4 sm:grid-cols-4 lg:grid-cols-8">
+            {enterpriseBadges.map(({ icon: Icon, label }) => (
+              <div
+                key={label}
+                className="flex flex-col items-center gap-3 rounded-xl border border-slate-200 bg-white p-4 text-center shadow-sm"
+              >
+                <Icon size={20} strokeWidth={1.9} className="text-violet-600" />
+                <span className="text-xs font-semibold text-slate-600">{label}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Stats */}
+      <section className="py-24">
+        <div className="mx-auto max-w-7xl px-6">
+          <div className="grid grid-cols-2 gap-8 rounded-3xl bg-gradient-to-br from-violet-50 via-white to-indigo-50 p-10 sm:grid-cols-4 sm:p-14">
+            {stats.map(({ value, label }) => (
+              <div key={label} className="text-center">
+                <p className="bg-gradient-to-br from-violet-600 to-indigo-600 bg-clip-text text-4xl font-black text-transparent sm:text-5xl">{value}</p>
+                <p className="mt-2 text-xs font-medium leading-relaxed text-slate-500">{label}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA */}
+      <section className="mx-auto max-w-7xl px-6 pb-24">
+        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-violet-600 via-indigo-600 to-indigo-700 px-8 py-16 text-center shadow-2xl shadow-violet-900/20 sm:px-16">
+          <div className="pointer-events-none absolute -left-16 -top-16 h-64 w-64 rounded-full bg-white/10 blur-3xl" aria-hidden />
+          <div className="pointer-events-none absolute -bottom-20 -right-10 h-72 w-72 rounded-full bg-black/10 blur-3xl" aria-hidden />
+          <h2 className="relative text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
+            Your organization already has the answers.<br />Capifort helps everyone find them.
+          </h2>
+          <div className="relative mt-9 flex flex-wrap items-center justify-center gap-3">
+            <Link href="/login" className="rounded-xl bg-white px-6 py-3.5 text-sm font-bold text-violet-700 shadow-lg transition hover:-translate-y-0.5 hover:bg-violet-50">
+              Book a Demo
+            </Link>
+            <Link href="#" className="rounded-xl border-2 border-white/40 px-6 py-3.5 text-sm font-bold text-white transition hover:bg-white/10">
+              Talk to Sales
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="border-t border-slate-100 py-16">
+        <div className="mx-auto max-w-7xl px-6">
+          <div className="grid gap-10 lg:grid-cols-6">
+            <div className="lg:col-span-2">
+              <Logo />
+              <p className="mt-4 max-w-xs text-sm leading-relaxed text-slate-500">
+                The AI-native operating system for enterprise intelligence, work and execution.
               </p>
             </div>
-            <div className="flex items-center gap-8">
-              {['Knowledge', 'Memory', 'Intelligence', 'Operations'].map((label) => (
-                <span key={label} className="type-label text-[var(--subtle)]">
-                  {label}
-                </span>
-              ))}
+            {footerColumns.map((col) => (
+              <div key={col.title}>
+                <p className="text-sm font-bold text-slate-900">{col.title}</p>
+                <ul className="mt-4 space-y-2.5">
+                  {col.links.map((link) => (
+                    <li key={link}><Link href="#" className="text-sm text-slate-500 hover:text-slate-900">{link}</Link></li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+            <div>
+              <p className="text-sm font-bold text-slate-900">Newsletter</p>
+              <p className="mt-4 text-sm leading-relaxed text-slate-500">Get insights on AI, knowledge management and enterprise productivity.</p>
+              <form className="mt-4 flex gap-2">
+                <input
+                  type="email"
+                  placeholder="Enter your email"
+                  className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm focus:border-violet-400 focus:outline-none"
+                />
+                <button type="submit" className="flex-shrink-0 rounded-lg bg-slate-900 px-3.5 py-2.5 text-sm font-bold text-white hover:bg-slate-800">&rarr;</button>
+              </form>
             </div>
           </div>
-        </Container>
+          <div className="mt-14 flex flex-col items-center justify-between gap-4 border-t border-slate-100 pt-7 sm:flex-row">
+            <p className="text-xs text-slate-400">&copy; 2026 Capifort, Inc. All rights reserved.</p>
+            <div className="flex gap-6 text-xs text-slate-400">
+              <Link href="#" className="hover:text-slate-600">Privacy Policy</Link>
+              <Link href="#" className="hover:text-slate-600">Terms of Service</Link>
+            </div>
+          </div>
+        </div>
       </footer>
-
-    </PageShell>
+    </div>
   )
 }

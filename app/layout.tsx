@@ -1,23 +1,7 @@
-import type { Metadata, Viewport } from 'next'
-import { Manrope, IBM_Plex_Mono, Inter } from 'next/font/google'
-import { SmoothScrollProvider } from '@/providers/smooth-scroll'
+import type { Metadata } from 'next'
+import { Inter } from 'next/font/google'
 import { AppAuthProvider } from '@/providers/auth-provider'
-import { ThemeProvider } from '@/context/theme-context'
 import './globals.css'
-
-const manrope = Manrope({
-  subsets: ['latin'],
-  variable: '--font-manrope',
-  display: 'swap',
-  weight: ['300', '400', '500', '600', '700'],
-})
-
-const ibmPlexMono = IBM_Plex_Mono({
-  subsets: ['latin'],
-  variable: '--font-ibm-plex-mono',
-  display: 'swap',
-  weight: ['400', '500'],
-})
 
 const inter = Inter({
   subsets: ['latin'],
@@ -28,34 +12,10 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: {
-    default: 'North — Operational Intelligence',
-    template: '%s — North',
+    default: 'Capifort — AI Operating System for Enterprise Intelligence',
+    template: '%s — Capifort',
   },
-  description: 'Direction for intelligent systems.',
-  metadataBase: new URL('https://north.so'),
-  openGraph: {
-    type: 'website',
-    locale: 'en_US',
-    title: 'North — Operational Intelligence',
-    description: 'Direction for intelligent systems.',
-    siteName: 'North',
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'North — Operational Intelligence',
-    description: 'Direction for intelligent systems.',
-  },
-  robots: {
-    index: true,
-    follow: true,
-  },
-}
-
-export const viewport: Viewport = {
-  themeColor: '#060606',
-  colorScheme: 'dark',
-  width: 'device-width',
-  initialScale: 1,
+  description: 'Capifort connects every source of your organizational knowledge and helps your team search, reason, automate, and execute with confidence.',
 }
 
 export default function RootLayout({
@@ -64,17 +24,9 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html
-      lang="en"
-      className={`${manrope.variable} ${ibmPlexMono.variable} ${inter.variable}`}
-      suppressHydrationWarning
-    >
-      <body>
-        <ThemeProvider>
-          <AppAuthProvider>
-            <SmoothScrollProvider>{children}</SmoothScrollProvider>
-          </AppAuthProvider>
-        </ThemeProvider>
+    <html lang="en" className={inter.variable}>
+      <body className="font-sans antialiased text-slate-900 bg-white">
+        <AppAuthProvider>{children}</AppAuthProvider>
       </body>
     </html>
   )
