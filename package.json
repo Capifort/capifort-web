@@ -10,14 +10,10 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
-    "clsx": "^2.1.1",
-    "framer-motion": "^11.18.0",
-    "lenis": "^1.1.18",
     "lucide-react": "^0.468.0",
     "next": "^16.2.10",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0",
-    "tailwind-merge": "^2.6.0"
+    "react-dom": "^19.0.0"
   },
   "devDependencies": {
     "@types/node": "^20",
