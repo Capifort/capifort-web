@@ -1,9 +1,9 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { ChevronRight, Folder as FolderIcon, FileText, Plus, X, ArrowLeft } from 'lucide-react'
+import { ChevronRight, Folder as FolderIcon, FileText, Plus, Upload, X, ArrowLeft } from 'lucide-react'
 import { listWorkspaces, type Workspace } from '@/lib/workspace-api'
-import { getRootFolder, getFolderContents, createFolder, type Folder, type FolderContents } from '@/lib/file-api'
+import { getRootFolder, getFolderContents, createFolder, uploadFile, type Folder, type FolderContents } from '@/lib/file-api'
 
 function formatBytes(bytes: number | null) {
   if (!bytes) return '—'
@@ -81,6 +81,8 @@ export default function WorkspacesPage() {
   const [contents, setContents] = useState<FolderContents | null>(null)
   const [contentsStatus, setContentsStatus] = useState<'loading' | 'error' | 'success'>('loading')
   const [newFolderOpen, setNewFolderOpen] = useState(false)
+  const [uploading, setUploading] = useState(false)
+  const [uploadError, setUploadError] = useState('')
 
   useEffect(() => {
     listWorkspaces()
@@ -140,6 +142,22 @@ export default function WorkspacesPage() {
     loadContents(selectedWorkspace.id, currentFolderId)
   }
 
+  const handleUploadFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    e.target.value = ''
+    if (!file || !selectedWorkspace || !currentFolderId) return
+    setUploadError('')
+    setUploading(true)
+    try {
+      await uploadFile(selectedWorkspace.id, currentFolderId, file)
+      loadContents(selectedWorkspace.id, currentFolderId)
+    } catch (err: any) {
+      setUploadError(err.message || 'Failed to upload file.')
+    } finally {
+      setUploading(false)
+    }
+  }
+
   return (
     <div className="min-h-dvh">
       <div className="flex items-center justify-between border-b border-slate-100 bg-white px-8 py-6">
@@ -148,15 +166,30 @@ export default function WorkspacesPage() {
           <p className="mt-1 text-sm text-slate-500">Browse and organize files across your workspaces.</p>
         </div>
         {selectedWorkspace && (
-          <button
-            onClick={() => setNewFolderOpen(true)}
-            className="flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-medium text-white hover:bg-slate-800"
-          >
-            <Plus size={15} strokeWidth={2} />
-            New Folder
-          </button>
+          <div className="flex items-center gap-3">
+            <label
+              className={`flex items-center gap-2 rounded-lg border border-slate-200 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 ${
+                uploading ? 'pointer-events-none opacity-50' : 'cursor-pointer'
+              }`}
+            >
+              <Upload size={15} strokeWidth={2} />
+              {uploading ? 'Uploading…' : 'Upload File'}
+              <input type="file" onChange={handleUploadFile} disabled={uploading} className="hidden" />
+            </label>
+            <button
+              onClick={() => setNewFolderOpen(true)}
+              className="flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-medium text-white hover:bg-slate-800"
+            >
+              <Plus size={15} strokeWidth={2} />
+              New Folder
+            </button>
+          </div>
         )}
       </div>
+
+      {uploadError && (
+        <div className="border-b border-red-100 bg-red-50 px-8 py-2 text-sm text-red-600">{uploadError}</div>
+      )}
 
       {newFolderOpen && <NewFolderModal onClose={() => setNewFolderOpen(false)} onCreate={handleCreateFolder} />}
 

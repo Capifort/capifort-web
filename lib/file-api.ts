@@ -42,6 +42,18 @@ export const createFolder = (workspaceId: string, name: string, parentId: string
     body: JSON.stringify({ name, parent_id: parentId, metadata: {} }),
   })
 
+export const uploadFile = (workspaceId: string, folderId: string, file: File): Promise<FileItem> => {
+  const formData = new FormData()
+  formData.append('upload', file)
+  formData.append('folder_id', folderId)
+  formData.append('conflict_policy', 'version')
+  formData.append('change_log', '')
+  return apiFetch(`/api/workspaces/${workspaceId}/files`, {
+    method: 'POST',
+    body: formData,
+  })
+}
+
 export interface DomainFileNode {
   id: string
   name: string
