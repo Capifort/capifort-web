@@ -4,10 +4,8 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
   Compass, LayoutDashboard, Folder, FileText, BrainCircuit, Bot,
-  MessageSquare, Activity, Users, Settings, LogOut,
+  MessageSquare, Activity, Users, Settings,
 } from 'lucide-react'
-import { useAuth } from '@/context/auth-context'
-
 const navItems = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/dashboard/workspaces', label: 'Workspaces', icon: Folder },
@@ -22,7 +20,6 @@ const navItems = [
 
 export function Sidebar() {
   const pathname = usePathname()
-  const { user, logout } = useAuth()
 
   return (
     <aside className="flex h-full w-60 flex-shrink-0 flex-col border-r border-slate-100 bg-white">
@@ -48,21 +45,6 @@ export function Sidebar() {
           )
         })}
       </nav>
-
-      <div className="border-t border-slate-100 p-4">
-        <div className="flex items-center gap-2 text-sm">
-          <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-slate-900 text-xs font-semibold text-white">
-            {(user?.username || 'U').slice(0, 1).toUpperCase()}
-          </div>
-          <div className="min-w-0 flex-1">
-            <p className="truncate font-medium text-slate-900">{user?.username || 'User'}</p>
-            <p className="truncate text-xs text-slate-400">{user?.email || ''}</p>
-          </div>
-          <button onClick={logout} aria-label="Log out" className="text-slate-400 hover:text-slate-600">
-            <LogOut size={16} strokeWidth={1.75} />
-          </button>
-        </div>
-      </div>
     </aside>
   )
 }
