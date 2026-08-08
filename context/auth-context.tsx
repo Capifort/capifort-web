@@ -16,6 +16,13 @@ interface AuthContextValue {
   user: User | null
   loading: boolean
   login: (username: string, password: string) => Promise<void>
+  register: (params: {
+    username: string
+    email: string
+    password: string
+    domain_name: string
+    entity_type: 'business' | 'enterprise'
+  }) => Promise<void>
   logout: () => void
 }
 
@@ -64,10 +71,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(me.user)
   }
 
+  const register = async (params: {
+    username: string
+    email: string
+    password: string
+    domain_name: string
+    entity_type: 'business' | 'enterprise'
+  }) => {
+    const data = await apiFetch('/api/auth/register', {
+      method: 'POST',
+      body: JSON.stringify(params),
+    })
+    setToken(data.access_token)
+    const me = await apiFetch('/api/access/me')
+    setUser(me.user)
+  }
+
   const logout = () => setToken(null)
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, register, logout }}>
       {children}
     </AuthContext.Provider>
   )
