@@ -59,7 +59,6 @@ export interface DomainFileNode {
   name: string
   path: string
   workspace_id: string
-  workspace_name: string | null
   folder_id: string
   extension: string | null
   mime_type: string | null
@@ -68,7 +67,7 @@ export interface DomainFileNode {
   created_at: string | null
 }
 
-interface DomainFolderNode {
+export interface DomainFolderNode {
   id: string
   name: string
   path: string
@@ -82,13 +81,7 @@ interface DomainContentEntry {
   folder: DomainFolderNode
 }
 
-export const listAllDomainFiles = async (domainId: string): Promise<DomainFileNode[]> => {
+export const getDomainFileTree = async (domainId: string): Promise<DomainFolderNode[]> => {
   const tree: DomainContentEntry[] = await apiFetch(`/api/file-system/domains/${domainId}/content`)
-  const files: DomainFileNode[] = []
-  const walk = (folder: DomainFolderNode) => {
-    files.push(...folder.files)
-    folder.children.forEach(walk)
-  }
-  tree.forEach((entry) => walk(entry.folder))
-  return files
+  return tree.map((entry) => entry.folder)
 }
