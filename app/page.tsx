@@ -2,16 +2,29 @@
 
 import { useState } from 'react'
 import Image from 'next/image'
-import { ArrowRight } from 'lucide-react'
+import { ArrowRight, Loader2 } from 'lucide-react'
+import { joinWaitlist } from '@/lib/waitlist-api'
 
 export default function LandingPage() {
   const [email, setEmail] = useState('')
   const [submitted, setSubmitted] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    if (!email) return
-    setSubmitted(true)
+    if (!email || isSubmitting) return
+
+    setIsSubmitting(true)
+    setError(null)
+    try {
+      await joinWaitlist(email)
+      setSubmitted(true)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Something went wrong. Please try again.')
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -23,7 +36,7 @@ export default function LandingPage() {
         priority
         className="object-cover"
       />
-      <div className="absolute inset-0 bg-black/10" />
+      <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/35 to-black/20" />
 
       <div className="relative flex min-h-dvh flex-col px-6 py-8 sm:px-10 sm:py-10">
         <header className="flex items-center justify-between">
@@ -42,15 +55,18 @@ export default function LandingPage() {
             FOR WHAT&apos;S NEXT
           </p>
 
-          <h1 className="mt-6 max-w-3xl text-5xl font-medium leading-[1.1] tracking-tight sm:text-6xl md:text-7xl">
+          <h1 className="mt-6 max-w-3xl text-5xl font-medium leading-[1.1] tracking-tight drop-shadow-[0_4px_20px_rgba(0,0,0,0.85)] sm:text-6xl md:text-7xl">
             Higher ground
             <br />
             for builders.
           </h1>
 
-          <p className="mt-6 max-w-md text-sm leading-relaxed text-white/80 sm:text-base">
-            Capifort is the platform for modern teams to build, run and scale
-            AI-native products — with clarity, control and confidence.
+          <p className="mt-6 max-w-md text-sm font-bold leading-relaxed text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.9)] sm:text-base">
+            Your company is telling you something.
+            <br />
+            Most of it is hiding in places no one thinks to look.
+            <br />
+            Soon, you&apos;ll be able to hear it.
           </p>
 
           <p className="mt-8 text-xs font-semibold tracking-[0.3em] text-white/80">
@@ -62,23 +78,32 @@ export default function LandingPage() {
           {submitted ? (
             <p className="text-sm font-medium text-white">You&apos;re on the list. We&apos;ll be in touch.</p>
           ) : (
-            <form onSubmit={handleSubmit} className="flex w-full max-w-sm items-center gap-2 rounded-full border border-white/30 bg-black/40 py-1.5 pl-5 pr-1.5 backdrop-blur-sm">
-              <input
-                type="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Enter your email"
-                className="w-full bg-transparent text-sm text-white placeholder:text-white/50 focus:outline-none"
-              />
-              <button
-                type="submit"
-                aria-label="Submit email"
-                className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-white text-black transition hover:bg-white/90"
-              >
-                <ArrowRight size={16} strokeWidth={2.25} />
-              </button>
-            </form>
+            <div className="flex w-full max-w-sm flex-col items-center gap-2">
+              <form onSubmit={handleSubmit} className="flex w-full items-center gap-2 rounded-full border border-white/30 bg-black/40 py-1.5 pl-5 pr-1.5 backdrop-blur-sm">
+                <input
+                  type="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Enter your email"
+                  disabled={isSubmitting}
+                  className="w-full bg-transparent text-sm text-white placeholder:text-white/50 focus:outline-none disabled:opacity-60"
+                />
+                <button
+                  type="submit"
+                  aria-label="Submit email"
+                  disabled={isSubmitting}
+                  className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-white text-black transition hover:bg-white/90 disabled:opacity-60"
+                >
+                  {isSubmitting ? (
+                    <Loader2 size={16} strokeWidth={2.25} className="animate-spin" />
+                  ) : (
+                    <ArrowRight size={16} strokeWidth={2.25} />
+                  )}
+                </button>
+              </form>
+              {error && <p className="text-xs font-medium text-red-300">{error}</p>}
+            </div>
           )}
           <p className="text-xs font-semibold tracking-[0.3em] text-white/80">BE THE FIRST TO KNOW</p>
 
