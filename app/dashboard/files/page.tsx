@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { ChevronRight, Folder as FolderIcon } from 'lucide-react'
 import { useAuth } from '@/context/auth-context'
 import { getDomainFileTree, type DomainFolderNode } from '@/lib/file-api'
+import { Spinner } from '@/components/spinner'
 
 function formatBytes(bytes: number | null) {
   if (!bytes) return '—'
@@ -115,7 +116,12 @@ export default function FilesPage() {
         </div>
 
         <div className="rounded-xl border border-slate-200 bg-white">
-          {status === 'loading' && <p className="p-6 text-sm text-slate-400">Loading files…</p>}
+          {status === 'loading' && (
+            <div className="flex items-center gap-2 p-6 text-sm text-slate-400">
+              <Spinner size={15} />
+              Loading files…
+            </div>
+          )}
           {status === 'error' && <p className="p-6 text-sm text-red-600">Couldn&apos;t load files.</p>}
           {status === 'success' && subfolders.length === 0 && files.length === 0 && (
             <p className="p-6 text-sm text-slate-400">This folder is empty.</p>
@@ -138,7 +144,10 @@ export default function FilesPage() {
                   <FileTypeBadge extension={file.extension} />
                   <span className="min-w-0 flex-1 truncate text-sm text-slate-700">{file.name}</span>
                   <span className="flex-shrink-0 text-xs text-slate-400">{formatBytes(file.size)}</span>
-                  <span className="flex-shrink-0 text-xs text-slate-400">{file.status}</span>
+                  <span className="flex flex-shrink-0 items-center gap-1.5 text-xs text-slate-400">
+                    {(file.status === 'pending' || file.status === 'uploading') && <Spinner size={12} />}
+                    {file.status}
+                  </span>
                 </div>
               ))}
             </div>
