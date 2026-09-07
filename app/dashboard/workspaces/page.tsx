@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { ChevronRight, Folder as FolderIcon, FileText, Plus, Upload, X, ArrowLeft } from 'lucide-react'
 import { listWorkspaces, createWorkspace, type Workspace } from '@/lib/workspace-api'
 import { getRootFolder, getFolderContents, createFolder, uploadFile, type Folder, type FolderContents } from '@/lib/file-api'
+import { Spinner } from '@/components/spinner'
 
 function formatBytes(bytes: number | null) {
   if (!bytes) return '—'
@@ -62,8 +63,9 @@ function NewFolderModal({ onClose, onCreate }: { onClose: () => void; onCreate: 
           <button
             type="submit"
             disabled={submitting}
-            className="w-full rounded-lg bg-slate-900 py-2.5 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-50"
+            className="flex w-full items-center justify-center gap-2 rounded-lg bg-slate-900 py-2.5 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-50"
           >
+            {submitting && <Spinner size={16} />}
             {submitting ? 'Creating…' : 'Create Folder'}
           </button>
         </form>
@@ -118,8 +120,9 @@ function CreateWorkspaceModal({ onClose, onCreated }: { onClose: () => void; onC
           <button
             type="submit"
             disabled={submitting}
-            className="w-full rounded-lg bg-slate-900 py-2.5 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-50"
+            className="flex w-full items-center justify-center gap-2 rounded-lg bg-slate-900 py-2.5 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-50"
           >
+            {submitting && <Spinner size={16} />}
             {submitting ? 'Creating…' : 'Create Workspace'}
           </button>
         </form>
@@ -229,7 +232,7 @@ export default function WorkspacesPage() {
                 uploading ? 'pointer-events-none opacity-50' : 'cursor-pointer'
               }`}
             >
-              <Upload size={15} strokeWidth={2} />
+              {uploading ? <Spinner size={15} /> : <Upload size={15} strokeWidth={2} />}
               {uploading ? 'Uploading…' : 'Upload File'}
               <input type="file" onChange={handleUploadFile} disabled={uploading} className="hidden" />
             </label>
@@ -268,7 +271,12 @@ export default function WorkspacesPage() {
       <div className="px-8 py-8">
         {!selectedWorkspace ? (
           <>
-            {workspacesStatus === 'loading' && <p className="text-sm text-slate-400">Loading workspaces…</p>}
+            {workspacesStatus === 'loading' && (
+              <div className="flex items-center gap-2 text-sm text-slate-400">
+                <Spinner size={15} />
+                Loading workspaces…
+              </div>
+            )}
             {workspacesStatus === 'error' && <p className="text-sm text-red-600">Couldn&apos;t load workspaces.</p>}
             {workspacesStatus === 'success' && workspaces.length === 0 && (
               <p className="text-sm text-slate-400">No workspaces yet.</p>
@@ -310,7 +318,12 @@ export default function WorkspacesPage() {
               ))}
             </div>
 
-            {contentsStatus === 'loading' && <p className="text-sm text-slate-400">Loading…</p>}
+            {contentsStatus === 'loading' && (
+              <div className="flex items-center gap-2 text-sm text-slate-400">
+                <Spinner size={15} />
+                Loading…
+              </div>
+            )}
             {contentsStatus === 'error' && <p className="text-sm text-red-600">Couldn&apos;t load folder contents.</p>}
 
             {contentsStatus === 'success' && contents && (
@@ -335,7 +348,10 @@ export default function WorkspacesPage() {
                       <FileText size={16} strokeWidth={1.75} className="flex-shrink-0 text-slate-400" />
                       <span className="min-w-0 flex-1 truncate text-sm text-slate-700">{file.name}</span>
                       <span className="flex-shrink-0 text-xs text-slate-400">{formatBytes(file.size)}</span>
-                      <span className="flex-shrink-0 text-xs text-slate-400">{file.status}</span>
+                      <span className="flex flex-shrink-0 items-center gap-1.5 text-xs text-slate-400">
+                        {(file.status === 'pending' || file.status === 'uploading') && <Spinner size={12} />}
+                        {file.status}
+                      </span>
                     </div>
                   ))}
                 </div>

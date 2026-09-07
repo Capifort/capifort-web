@@ -4,6 +4,7 @@ import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/context/auth-context'
 import { Sidebar } from '@/components/dashboard/sidebar'
+import { Spinner } from '@/components/spinner'
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth()
@@ -16,7 +17,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   if (loading || !user) {
     return (
       <div className="flex min-h-dvh items-center justify-center bg-white">
-        <p className="text-sm text-slate-400">Loading…</p>
+        <div className="flex items-center gap-2 text-sm text-slate-400">
+          <Spinner size={16} />
+          Loading…
+        </div>
       </div>
     )
   }

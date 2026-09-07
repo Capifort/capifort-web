@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { UserPlus, X, Trash2 } from 'lucide-react'
 import { useAuth } from '@/context/auth-context'
 import { apiFetch } from '@/lib/api'
+import { Spinner } from '@/components/spinner'
 
 interface Member {
   id: string
@@ -207,8 +208,9 @@ export default function SettingsPage() {
                     <button
                       type="submit"
                       disabled={submitting}
-                      className="rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-50"
+                      className="flex items-center justify-center gap-2 rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-50"
                     >
+                      {submitting && <Spinner size={14} />}
                       {submitting ? 'Adding…' : 'Add user'}
                     </button>
                   </div>
@@ -223,7 +225,10 @@ export default function SettingsPage() {
               </div>
 
               {loading ? (
-                <p className="text-sm text-slate-400">Loading…</p>
+                <div className="flex items-center gap-2 text-sm text-slate-400">
+                  <Spinner size={15} />
+                  Loading…
+                </div>
               ) : members.length === 0 ? (
                 <p className="text-sm text-slate-400">No members yet.</p>
               ) : (

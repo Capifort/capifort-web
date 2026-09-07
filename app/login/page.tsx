@@ -6,6 +6,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { Mail, Lock, Eye, EyeOff, ArrowRight, Apple } from 'lucide-react'
 import { useAuth } from '@/context/auth-context'
+import { Spinner } from '@/components/spinner'
 
 function GoogleIcon() {
   return (
@@ -135,6 +136,7 @@ export default function LoginPage() {
               disabled={submitting}
               className="flex w-full items-center justify-center gap-2 rounded-lg bg-slate-900 py-3 text-sm font-medium text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
             >
+              {submitting && <Spinner size={16} />}
               {submitting ? 'Signing in…' : 'Sign in'}
               {!submitting && <ArrowRight size={16} strokeWidth={2} />}
             </button>
