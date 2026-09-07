@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { ChevronRight, Folder as FolderIcon, FileText, Plus, Upload, X, ArrowLeft } from 'lucide-react'
-import { listWorkspaces, type Workspace } from '@/lib/workspace-api'
+import { listWorkspaces, createWorkspace, type Workspace } from '@/lib/workspace-api'
 import { getRootFolder, getFolderContents, createFolder, uploadFile, type Folder, type FolderContents } from '@/lib/file-api'
 
 function formatBytes(bytes: number | null) {
@@ -72,9 +72,66 @@ function NewFolderModal({ onClose, onCreate }: { onClose: () => void; onCreate: 
   )
 }
 
+function CreateWorkspaceModal({ onClose, onCreated }: { onClose: () => void; onCreated: (w: Workspace) => void }) {
+  const [name, setName] = useState('')
+  const [submitting, setSubmitting] = useState(false)
+  const [error, setError] = useState('')
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setError('')
+    setSubmitting(true)
+    try {
+      const workspace = await createWorkspace(name)
+      onCreated(workspace)
+      onClose()
+    } catch (err: any) {
+      setError(err.message || 'Failed to create workspace.')
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 px-4">
+      <div className="w-full max-w-sm rounded-xl bg-white p-6">
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="text-sm font-semibold text-slate-900">Create Workspace</h2>
+          <button onClick={onClose} aria-label="Close" className="text-slate-400 hover:text-slate-600">
+            <X size={16} />
+          </button>
+        </div>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {error && <p className="text-sm text-red-600">{error}</p>}
+          <div>
+            <label className="mb-1.5 block text-sm font-medium text-slate-700">Workspace name</label>
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+              autoFocus
+              placeholder="e.g. Finance Workspace"
+              className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm focus:border-violet-400 focus:outline-none"
+            />
+          </div>
+          <button
+            type="submit"
+            disabled={submitting}
+            className="w-full rounded-lg bg-slate-900 py-2.5 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-50"
+          >
+            {submitting ? 'Creating…' : 'Create Workspace'}
+          </button>
+        </form>
+      </div>
+    </div>
+  )
+}
+
 export default function WorkspacesPage() {
   const [workspaces, setWorkspaces] = useState<Workspace[]>([])
   const [workspacesStatus, setWorkspacesStatus] = useState<'loading' | 'error' | 'success'>('loading')
+  const [createOpen, setCreateOpen] = useState(false)
 
   const [selectedWorkspace, setSelectedWorkspace] = useState<Workspace | null>(null)
   const [breadcrumb, setBreadcrumb] = useState<Array<{ id: string; name: string }>>([])
@@ -185,6 +242,15 @@ export default function WorkspacesPage() {
             </button>
           </div>
         )}
+        {!selectedWorkspace && (
+          <button
+            onClick={() => setCreateOpen(true)}
+            className="flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-medium text-white hover:bg-slate-800"
+          >
+            <Plus size={15} strokeWidth={2} />
+            Create Workspace
+          </button>
+        )}
       </div>
 
       {uploadError && (
@@ -192,6 +258,12 @@ export default function WorkspacesPage() {
       )}
 
       {newFolderOpen && <NewFolderModal onClose={() => setNewFolderOpen(false)} onCreate={handleCreateFolder} />}
+      {createOpen && (
+        <CreateWorkspaceModal
+          onClose={() => setCreateOpen(false)}
+          onCreated={(w) => setWorkspaces((prev) => [w, ...prev])}
+        />
+      )}
 
       <div className="px-8 py-8">
         {!selectedWorkspace ? (

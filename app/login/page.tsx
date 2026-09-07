@@ -2,54 +2,30 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Image from 'next/image'
 import Link from 'next/link'
-import {
-  Compass, Mail, Lock, Eye, EyeOff, FileText, Database, Folder,
-  BrainCircuit, Users, TrendingUp, ShieldCheck, Lock as LockIcon, Cloud, Zap,
-} from 'lucide-react'
+import { Mail, Lock, Eye, EyeOff, ArrowRight, Apple } from 'lucide-react'
 import { useAuth } from '@/context/auth-context'
 
-const featureBadges = [
-  { icon: ShieldCheck, title: 'Enterprise Ready', desc: 'SOC 2 ready, SSO, and role-based access' },
-  { icon: LockIcon, title: 'Secure by Design', desc: 'End-to-end encryption and data protection' },
-  { icon: Cloud, title: 'Private or Cloud', desc: 'Deploy in your cloud or on-premise' },
-  { icon: Zap, title: 'Built for Scale', desc: 'Handle millions of files and complex workflows' },
-]
-
-const satellites = [
-  { icon: FileText, angle: -90 },
-  { icon: Folder, angle: -30 },
-  { icon: TrendingUp, angle: 30 },
-  { icon: Users, angle: 90 },
-  { icon: BrainCircuit, angle: -150 },
-  { icon: Database, angle: 150 },
-]
-
-function OrbitGraphic() {
+function GoogleIcon() {
   return (
-    <div className="relative mx-auto aspect-square w-full max-w-sm">
-      <div className="absolute inset-0 rounded-full border border-white/10" />
-      <div className="absolute inset-10 rounded-full border border-white/10" />
-      <div className="absolute inset-0 flex items-center justify-center">
-        <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-500 to-indigo-600 text-xl font-bold text-white shadow-lg shadow-violet-900/50">
-          N
-        </div>
-      </div>
-      {satellites.map(({ icon: Icon, angle }, i) => {
-        const radius = 46
-        const x = 50 + radius * Math.cos((angle * Math.PI) / 180)
-        const y = 50 + radius * Math.sin((angle * Math.PI) / 180)
-        return (
-          <div
-            key={i}
-            className="absolute flex h-11 w-11 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-violet-300"
-            style={{ left: `${x}%`, top: `${y}%` }}
-          >
-            <Icon size={18} strokeWidth={1.75} />
-          </div>
-        )
-      })}
-    </div>
+    <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true">
+      <path fill="#4285F4" d="M23.49 12.27c0-.79-.07-1.54-.19-2.27H12v4.51h6.47c-.29 1.48-1.14 2.73-2.4 3.58v3h3.86c2.26-2.09 3.56-5.17 3.56-8.82z" />
+      <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.86-3c-1.08.72-2.45 1.16-4.07 1.16-3.13 0-5.78-2.11-6.73-4.96H1.29v3.09C3.26 21.3 7.31 24 12 24z" />
+      <path fill="#FBBC05" d="M5.27 14.29c-.25-.72-.38-1.49-.38-2.29s.14-1.57.38-2.29V6.62H1.29A11.97 11.97 0 0 0 0 12c0 1.93.46 3.76 1.29 5.38l3.98-3.09z" />
+      <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.31 0 3.26 2.7 1.29 6.62l3.98 3.09C6.22 6.86 8.87 4.75 12 4.75z" />
+    </svg>
+  )
+}
+
+function MicrosoftIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true">
+      <rect x="1" y="1" width="10" height="10" fill="#F25022" />
+      <rect x="13" y="1" width="10" height="10" fill="#7FBA00" />
+      <rect x="1" y="13" width="10" height="10" fill="#00A4EF" />
+      <rect x="13" y="13" width="10" height="10" fill="#FFB900" />
+    </svg>
   )
 }
 
@@ -57,7 +33,6 @@ export default function LoginPage() {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
-  const [rememberMe, setRememberMe] = useState(false)
   const [error, setError] = useState('')
   const [submitting, setSubmitting] = useState(false)
 
@@ -84,21 +59,28 @@ export default function LoginPage() {
 
   return (
     <div className="grid min-h-dvh lg:grid-cols-2">
+      {/* Left — hero image */}
+      <div className="relative hidden lg:block">
+        <Image src="/login-hero.png" alt="Capifort — Truth has a source." fill priority className="object-cover object-left" />
+      </div>
 
-      {/* Left — form */}
-      <div className="flex flex-col justify-center px-6 py-12 sm:px-12 lg:px-20">
-        <Link href="/" className="flex items-center gap-2 font-semibold text-slate-900">
-          <Compass size={20} strokeWidth={2} />
-          CAPIFORT
-        </Link>
+      {/* Right — form */}
+      <div className="flex min-h-dvh flex-col px-6 py-10 sm:px-12 lg:px-16">
+        <div className="flex items-center justify-end gap-3">
+          <span className="text-sm text-slate-400">New to Capifort?</span>
+          <Link
+            href="/register"
+            className="rounded-full border border-slate-200 px-4 py-2 text-sm font-medium text-slate-900 hover:bg-slate-50"
+          >
+            Create an account
+          </Link>
+        </div>
 
-        <div className="mx-auto mt-16 w-full max-w-sm">
-          <h1 className="flex items-center gap-2 text-2xl font-bold text-slate-900">
-            Welcome back <span aria-hidden>👋</span>
-          </h1>
-          <p className="mt-1 text-sm text-slate-500">Sign in to continue to Capifort</p>
+        <div className="mx-auto flex w-full max-w-sm flex-1 flex-col justify-center">
+          <h1 className="font-serif text-4xl text-slate-900">Welcome back</h1>
+          <p className="mt-2 text-sm text-slate-500">Sign in to continue your investigations.</p>
 
-          <form onSubmit={handleSubmit} className="mt-8 space-y-4">
+          <form onSubmit={handleSubmit} className="mt-8 space-y-5">
             {error && (
               <div className="rounded-lg border border-red-100 bg-red-50 px-3.5 py-2.5 text-sm text-red-600">
                 {error}
@@ -106,28 +88,28 @@ export default function LoginPage() {
             )}
 
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-slate-700">Email address</label>
+              <label className="mb-1.5 block text-sm font-medium text-slate-900">Email</label>
               <div className="relative">
-                <Mail size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                <Mail size={16} strokeWidth={1.75} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
                 <input
                   type="text"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   required
                   autoComplete="username"
-                  placeholder="name@company.com"
-                  className="w-full rounded-lg border border-slate-200 py-2.5 pl-10 pr-3 text-sm placeholder:text-slate-400 focus:border-violet-400 focus:outline-none"
+                  placeholder="you@company.com"
+                  className="w-full rounded-lg border border-slate-200 py-3 pl-10 pr-3 text-sm placeholder:text-slate-400 focus:border-slate-400 focus:outline-none"
                 />
               </div>
             </div>
 
             <div>
               <div className="mb-1.5 flex items-center justify-between">
-                <label className="text-sm font-medium text-slate-700">Password</label>
-                <Link href="#" className="text-xs font-medium text-violet-600 hover:text-violet-700">Forgot password?</Link>
+                <label className="text-sm font-medium text-slate-900">Password</label>
+                <Link href="#" className="text-xs text-slate-500 underline hover:text-slate-700">Forgot password?</Link>
               </div>
               <div className="relative">
-                <Lock size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                <Lock size={16} strokeWidth={1.75} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
                 <input
                   type={showPassword ? 'text' : 'password'}
                   value={password}
@@ -135,12 +117,12 @@ export default function LoginPage() {
                   required
                   autoComplete="current-password"
                   placeholder="Enter your password"
-                  className="w-full rounded-lg border border-slate-200 py-2.5 pl-10 pr-10 text-sm placeholder:text-slate-400 focus:border-violet-400 focus:outline-none"
+                  className="w-full rounded-lg border border-slate-200 py-3 pl-10 pr-10 text-sm placeholder:text-slate-400 focus:border-slate-400 focus:outline-none"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword((v) => !v)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
                   aria-label={showPassword ? 'Hide password' : 'Show password'}
                 >
                   {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
@@ -148,60 +130,45 @@ export default function LoginPage() {
               </div>
             </div>
 
-            <label className="flex items-center gap-2 text-sm text-slate-600">
-              <input
-                type="checkbox"
-                checked={rememberMe}
-                onChange={(e) => setRememberMe(e.target.checked)}
-                className="h-4 w-4 rounded border-slate-300 text-violet-600 focus:ring-violet-400"
-              />
-              Remember me
-            </label>
-
             <button
               type="submit"
               disabled={submitting}
-              className="w-full rounded-lg bg-slate-900 py-2.5 text-sm font-medium text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex w-full items-center justify-center gap-2 rounded-lg bg-slate-900 py-3 text-sm font-medium text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {submitting ? 'Signing in…' : 'Sign in'}
+              {!submitting && <ArrowRight size={16} strokeWidth={2} />}
             </button>
           </form>
 
-          <Link
-            href="/register"
-            className="mt-6 block w-full rounded-lg border border-slate-200 py-2.5 text-center text-sm font-medium text-slate-700 hover:bg-slate-50"
-          >
-            Register
-          </Link>
-        </div>
+          <div className="mt-6 flex items-center gap-3">
+            <div className="h-px flex-1 bg-slate-200" />
+            <span className="text-[11px] font-medium tracking-wide text-slate-400">OR CONTINUE WITH</span>
+            <div className="h-px flex-1 bg-slate-200" />
+          </div>
 
-        <div className="mt-auto flex flex-col gap-2 pt-12 text-xs text-slate-400 sm:flex-row sm:items-center sm:justify-between">
-          <span>&copy; 2026 Capifort, Inc. All rights reserved.</span>
-          <div className="flex gap-4">
-            <Link href="#" className="hover:text-slate-600">Privacy Policy</Link>
-            <Link href="#" className="hover:text-slate-600">Terms of Service</Link>
+          <div className="mt-4 grid grid-cols-3 gap-3">
+            <button className="flex items-center justify-center gap-2 rounded-lg border border-slate-200 py-2.5 text-sm text-slate-700 hover:bg-slate-50">
+              <GoogleIcon />
+              Google
+            </button>
+            <button className="flex items-center justify-center gap-2 rounded-lg border border-slate-200 py-2.5 text-sm text-slate-700 hover:bg-slate-50">
+              <MicrosoftIcon />
+              Microsoft
+            </button>
+            <button className="flex items-center justify-center gap-2 rounded-lg border border-slate-200 py-2.5 text-sm text-slate-700 hover:bg-slate-50">
+              <Apple size={16} strokeWidth={1.75} />
+              Apple
+            </button>
           </div>
         </div>
-      </div>
 
-      {/* Right — dark panel */}
-      <div className="relative hidden flex-col justify-center overflow-hidden bg-slate-950 px-16 py-12 lg:flex">
-        <OrbitGraphic />
-        <h2 className="mt-10 text-3xl font-bold leading-snug text-white">
-          Capifort is the operating system<br />
-          <span className="text-violet-400">for enterprise intelligence.</span>
-        </h2>
-        <p className="mt-4 max-w-md text-sm text-slate-400">
-          Connect your knowledge, empower your teams, and turn information into action.
-        </p>
-        <div className="mt-10 grid grid-cols-2 gap-6">
-          {featureBadges.map(({ icon: Icon, title, desc }) => (
-            <div key={title}>
-              <Icon size={18} strokeWidth={1.75} className="text-violet-400" />
-              <p className="mt-2 text-sm font-medium text-white">{title}</p>
-              <p className="mt-0.5 text-xs text-slate-500">{desc}</p>
-            </div>
-          ))}
+        <div className="flex flex-col gap-3 pt-8 text-xs text-slate-400 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex gap-4">
+            <Link href="#" className="hover:text-slate-600">Help</Link>
+            <Link href="#" className="hover:text-slate-600">Privacy</Link>
+            <Link href="#" className="hover:text-slate-600">Terms</Link>
+          </div>
+          <span>&copy; 2026 Capifort. All rights reserved.</span>
         </div>
       </div>
     </div>
