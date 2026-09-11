@@ -2,6 +2,7 @@
 
 import { createContext, useCallback, useContext, useEffect, useState } from 'react'
 import { apiFetch, setStoredToken } from '@/lib/api'
+import { switchDomain as switchDomainRequest } from '@/lib/domain-api'
 
 export interface User {
   id: string
@@ -24,6 +25,7 @@ interface AuthContextValue {
     entity_type: 'business' | 'enterprise'
   }) => Promise<void>
   logout: () => void
+  switchDomain: (domainId: string) => Promise<void>
 }
 
 const TOKEN_KEY = 'consumer_token'
@@ -89,8 +91,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logout = () => setToken(null)
 
+  const switchDomain = async (domainId: string) => {
+    const data = await switchDomainRequest(domainId)
+    setToken(data.access_token)
+    setUser(data.user as User)
+  }
+
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, register, logout, switchDomain }}>
       {children}
     </AuthContext.Provider>
   )
