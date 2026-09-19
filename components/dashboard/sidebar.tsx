@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { FileText, BarChart3, Database, Building2, ChevronsUpDown, Settings, LogOut } from 'lucide-react'
+import { FileText, BarChart3, Database, ChevronsUpDown, Settings, LogOut } from 'lucide-react'
 import { useAuth } from '@/context/auth-context'
 
 const navItems = [
@@ -11,7 +11,6 @@ const navItems = [
   { href: '/dashboard/files', label: 'Documents', icon: FileText },
   { href: '/dashboard/reports', label: 'Reports', icon: BarChart3 },
   { href: '/dashboard/memory', label: 'Memory', icon: Database },
-  { href: '/dashboard/workspaces', label: 'Workspace', icon: Building2 },
 ]
 
 function CapifortMark() {
@@ -79,7 +78,7 @@ function AccountMenu() {
         </div>
         <span className="min-w-0 flex-1">
           <span className="block truncate text-sm font-medium text-slate-900">{user?.username || 'Account'}</span>
-          <span className="block truncate text-xs text-slate-400">{user?.domain?.name || 'Workspace'}</span>
+          <span className="block truncate text-xs text-slate-400">{user?.domain?.name || 'Domain'}</span>
         </span>
         <ChevronsUpDown size={14} strokeWidth={1.75} className="flex-shrink-0 text-slate-300" />
       </button>

@@ -29,7 +29,6 @@ export interface FileItem {
   object_key: string | null
   storage_provider: string
   metadata: Record<string, any>
-  pipeline: Record<string, any>
   tags: any[]
   permissions: Record<string, any>
   created_by: string | null
