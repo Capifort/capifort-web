@@ -3,12 +3,14 @@
 import { useState } from 'react'
 import { MembersTab } from '@/components/settings/members-tab'
 import { DomainTab } from '@/components/settings/domain-tab'
+import { WorkspaceTab } from '@/components/settings/workspace-tab'
 
-type SettingsTab = 'members' | 'domain'
+type SettingsTab = 'members' | 'domain' | 'workspace'
 
 const TABS: { id: SettingsTab; label: string }[] = [
   { id: 'members', label: 'Members' },
   { id: 'domain', label: 'Domain' },
+  { id: 'workspace', label: 'Workspace' },
 ]
 
 export default function SettingsPage() {
@@ -38,7 +40,9 @@ export default function SettingsPage() {
       </div>
 
       <div className="px-8 py-8">
-        {activeTab === 'members' ? <MembersTab /> : <DomainTab />}
+        {activeTab === 'members' && <MembersTab />}
+        {activeTab === 'domain' && <DomainTab />}
+        {activeTab === 'workspace' && <WorkspaceTab />}
       </div>
     </div>
   )

@@ -3,7 +3,6 @@ import { apiFetch } from './api'
 export interface Domain {
   id: string
   name: string
-  slug: string
   entity_type: string
   created_at: string
 }

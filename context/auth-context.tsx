@@ -3,6 +3,7 @@
 import { createContext, useCallback, useContext, useEffect, useState } from 'react'
 import { apiFetch, setStoredToken } from '@/lib/api'
 import { switchDomain as switchDomainRequest } from '@/lib/domain-api'
+import { switchWorkspace as switchWorkspaceRequest, type Workspace } from '@/lib/workspace-api'
 
 export interface User {
   id: string
@@ -10,7 +11,9 @@ export interface User {
   email: string
   role?: string
   domain_id?: string
-  domain?: { id: string; name: string; slug: string; entity_type: string }
+  domain?: { id: string; name: string; entity_type: string }
+  current_workspace_id?: string | null
+  current_workspace?: Workspace | null
 }
 
 interface AuthContextValue {
@@ -26,6 +29,7 @@ interface AuthContextValue {
   }) => Promise<void>
   logout: () => void
   switchDomain: (domainId: string) => Promise<void>
+  switchWorkspace: (workspaceId: string) => Promise<void>
 }
 
 const TOKEN_KEY = 'consumer_token'
@@ -97,8 +101,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(data.user as User)
   }
 
+  const switchWorkspace = async (workspaceId: string) => {
+    const data = await switchWorkspaceRequest(workspaceId)
+    setToken(data.access_token)
+    setUser(data.user as User)
+  }
+
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout, switchDomain }}>
+    <AuthContext.Provider value={{ user, loading, login, register, logout, switchDomain, switchWorkspace }}>
       {children}
     </AuthContext.Provider>
   )

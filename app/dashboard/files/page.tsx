@@ -1,9 +1,16 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { ChevronRight, Folder as FolderIcon } from 'lucide-react'
+import { ChevronRight, Folder as FolderIcon, Plus, Upload, X } from 'lucide-react'
 import { useAuth } from '@/context/auth-context'
-import { getDomainFileTree, type DomainFolderNode } from '@/lib/file-api'
+import {
+  getRootFolder,
+  getFolderContents,
+  createFolder,
+  uploadFile,
+  type Folder,
+  type FolderContents,
+} from '@/lib/file-api'
 import { Spinner } from '@/components/spinner'
 
 function formatBytes(bytes: number | null) {
@@ -55,80 +62,212 @@ function FileTypeBadge({ extension }: { extension: string | null }) {
   )
 }
 
+function NewFolderModal({ onClose, onCreate }: { onClose: () => void; onCreate: (name: string) => Promise<void> }) {
+  const [name, setName] = useState('')
+  const [submitting, setSubmitting] = useState(false)
+  const [error, setError] = useState('')
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setError('')
+    setSubmitting(true)
+    try {
+      await onCreate(name)
+      onClose()
+    } catch (err: any) {
+      setError(err.message || 'Failed to create folder.')
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 px-4">
+      <div className="w-full max-w-sm rounded-xl bg-white p-6">
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="text-sm font-semibold text-slate-900">New Folder</h2>
+          <button onClick={onClose} aria-label="Close" className="text-slate-400 hover:text-slate-600">
+            <X size={16} />
+          </button>
+        </div>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {error && <p className="text-sm text-red-600">{error}</p>}
+          <div>
+            <label className="mb-1.5 block text-sm font-medium text-slate-700">Folder name</label>
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+              autoFocus
+              placeholder="e.g. Contracts"
+              className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm focus:border-violet-400 focus:outline-none"
+            />
+          </div>
+          <button
+            type="submit"
+            disabled={submitting}
+            className="flex w-full items-center justify-center gap-2 rounded-lg bg-slate-900 py-2.5 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-50"
+          >
+            {submitting && <Spinner size={16} />}
+            {submitting ? 'Creating…' : 'Create Folder'}
+          </button>
+        </form>
+      </div>
+    </div>
+  )
+}
+
 export default function FilesPage() {
   const { user } = useAuth()
-  const domainId = user?.domain_id || user?.domain?.id || null
+  const workspaceId = user?.current_workspace_id || null
 
-  const [tree, setTree] = useState<DomainFolderNode[]>([])
+  const [breadcrumb, setBreadcrumb] = useState<Array<{ id: string; name: string }>>([])
+  const [contents, setContents] = useState<FolderContents | null>(null)
   const [status, setStatus] = useState<'loading' | 'error' | 'success'>('loading')
-  const [stack, setStack] = useState<DomainFolderNode[]>([])
+  const [newFolderOpen, setNewFolderOpen] = useState(false)
+  const [uploading, setUploading] = useState(false)
+  const [uploadError, setUploadError] = useState('')
 
-  useEffect(() => {
-    if (!domainId) {
-      setStatus('error')
-      return
-    }
-    getDomainFileTree(domainId)
+  const loadContents = (folderId: string) => {
+    if (!workspaceId) return
+    setStatus('loading')
+    getFolderContents(workspaceId, folderId)
       .then((data) => {
-        setTree(data)
+        setContents(data)
         setStatus('success')
       })
       .catch(() => setStatus('error'))
-  }, [domainId])
-
-  const openFolder = (folder: DomainFolderNode) => setStack((prev) => [...prev, folder])
-
-  const jumpToBreadcrumb = (index: number) => {
-    // index -1 means the "All Workspaces" root
-    setStack((prev) => prev.slice(0, index + 1))
   }
 
-  const currentFolder = stack[stack.length - 1] || null
-  const subfolders = currentFolder ? currentFolder.children : tree
-  const files = currentFolder ? currentFolder.files : []
+  useEffect(() => {
+    if (!workspaceId) {
+      setStatus('error')
+      return
+    }
+    getRootFolder(workspaceId)
+      .then((root) => {
+        setBreadcrumb([{ id: root.id, name: root.name }])
+        loadContents(root.id)
+      })
+      .catch(() => setStatus('error'))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [workspaceId])
+
+  const openFolder = (folder: Folder) => {
+    setBreadcrumb((prev) => [...prev, { id: folder.id, name: folder.name }])
+    loadContents(folder.id)
+  }
+
+  const jumpToBreadcrumb = (index: number) => {
+    const next = breadcrumb.slice(0, index + 1)
+    setBreadcrumb(next)
+    loadContents(next[next.length - 1].id)
+  }
+
+  const currentFolderId = breadcrumb[breadcrumb.length - 1]?.id
+
+  const handleCreateFolder = async (name: string) => {
+    if (!workspaceId || !currentFolderId) return
+    await createFolder(workspaceId, name, currentFolderId)
+    loadContents(currentFolderId)
+  }
+
+  const handleUploadFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    e.target.value = ''
+    if (!file || !workspaceId || !currentFolderId) return
+    setUploadError('')
+    setUploading(true)
+    try {
+      await uploadFile(workspaceId, currentFolderId, file)
+      loadContents(currentFolderId)
+    } catch (err: any) {
+      setUploadError(err.message || 'Failed to upload file.')
+    } finally {
+      setUploading(false)
+    }
+  }
+
+  if (!workspaceId) {
+    return (
+      <div className="min-h-dvh">
+        <div className="border-b border-slate-100 bg-white px-8 py-6">
+          <h1 className="text-lg font-semibold text-slate-900">Documents</h1>
+          <p className="mt-1 text-sm text-slate-500">Manage folders and files in your workspace.</p>
+        </div>
+        <div className="px-8 py-8">
+          <p className="text-sm text-slate-400">
+            No workspace selected yet. Create or switch to one from Settings → Workspace.
+          </p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-dvh">
-      <div className="border-b border-slate-100 bg-white px-8 py-6">
-        <h1 className="text-lg font-semibold text-slate-900">Files</h1>
-        <p className="mt-1 text-sm text-slate-500">Every folder and file across every workspace in your organization.</p>
+      <div className="flex items-center justify-between border-b border-slate-100 bg-white px-8 py-6">
+        <div>
+          <h1 className="text-lg font-semibold text-slate-900">Documents</h1>
+          <p className="mt-1 text-sm text-slate-500">Manage folders and files in your workspace.</p>
+        </div>
+        <div className="flex items-center gap-3">
+          <label
+            className={`flex items-center gap-2 rounded-lg border border-slate-200 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 ${
+              uploading ? 'pointer-events-none opacity-50' : 'cursor-pointer'
+            }`}
+          >
+            {uploading ? <Spinner size={15} /> : <Upload size={15} strokeWidth={2} />}
+            {uploading ? 'Uploading…' : 'Upload File'}
+            <input type="file" onChange={handleUploadFile} disabled={uploading} className="hidden" />
+          </label>
+          <button
+            onClick={() => setNewFolderOpen(true)}
+            className="flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-medium text-white hover:bg-slate-800"
+          >
+            <Plus size={15} strokeWidth={2} />
+            New Folder
+          </button>
+        </div>
       </div>
+
+      {uploadError && (
+        <div className="border-b border-red-100 bg-red-50 px-8 py-2 text-sm text-red-600">{uploadError}</div>
+      )}
+
+      {newFolderOpen && <NewFolderModal onClose={() => setNewFolderOpen(false)} onCreate={handleCreateFolder} />}
 
       <div className="px-8 py-8">
         <div className="mb-6 flex items-center gap-2 text-sm">
-          <button
-            onClick={() => jumpToBreadcrumb(-1)}
-            className={stack.length === 0 ? 'font-semibold text-slate-900' : 'text-slate-500 hover:text-slate-700'}
-          >
-            All Workspaces
-          </button>
-          {stack.map((folder, i) => (
-            <span key={folder.id} className="flex items-center gap-2">
-              <ChevronRight size={13} className="text-slate-300" />
+          {breadcrumb.map((crumb, i) => (
+            <span key={crumb.id} className="flex items-center gap-2">
+              {i > 0 && <ChevronRight size={13} className="text-slate-300" />}
               <button
                 onClick={() => jumpToBreadcrumb(i)}
-                className={i === stack.length - 1 ? 'font-semibold text-slate-900' : 'text-slate-500 hover:text-slate-700'}
+                className={i === breadcrumb.length - 1 ? 'font-semibold text-slate-900' : 'text-slate-500 hover:text-slate-700'}
               >
-                {folder.name}
+                {crumb.name}
               </button>
             </span>
           ))}
         </div>
 
-        <div className="rounded-xl border border-slate-200 bg-white">
-          {status === 'loading' && (
-            <div className="flex items-center gap-2 p-6 text-sm text-slate-400">
-              <Spinner size={15} />
-              Loading files…
-            </div>
-          )}
-          {status === 'error' && <p className="p-6 text-sm text-red-600">Couldn&apos;t load files.</p>}
-          {status === 'success' && subfolders.length === 0 && files.length === 0 && (
-            <p className="p-6 text-sm text-slate-400">This folder is empty.</p>
-          )}
-          {status === 'success' && (subfolders.length > 0 || files.length > 0) && (
+        {status === 'loading' && (
+          <div className="flex items-center gap-2 text-sm text-slate-400">
+            <Spinner size={15} />
+            Loading…
+          </div>
+        )}
+        {status === 'error' && <p className="text-sm text-red-600">Couldn&apos;t load folder contents.</p>}
+
+        {status === 'success' && contents && (
+          <div className="rounded-xl border border-slate-200 bg-white">
+            {contents.subfolders.length === 0 && contents.files.length === 0 && (
+              <p className="p-6 text-sm text-slate-400">This folder is empty.</p>
+            )}
             <div className="divide-y divide-slate-50">
-              {subfolders.map((folder) => (
+              {contents.subfolders.map((folder) => (
                 <button
                   key={folder.id}
                   onClick={() => openFolder(folder)}
@@ -139,7 +278,7 @@ export default function FilesPage() {
                   <ChevronRight size={14} className="flex-shrink-0 text-slate-300" />
                 </button>
               ))}
-              {files.map((file) => (
+              {contents.files.map((file) => (
                 <div key={file.id} className="flex items-center gap-3 px-5 py-3">
                   <FileTypeBadge extension={file.extension} />
                   <span className="min-w-0 flex-1 truncate text-sm text-slate-700">{file.name}</span>
@@ -151,8 +290,8 @@ export default function FilesPage() {
                 </div>
               ))}
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </div>
   )
