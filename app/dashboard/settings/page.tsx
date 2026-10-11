@@ -4,13 +4,15 @@ import { useState } from 'react'
 import { MembersTab } from '@/components/settings/members-tab'
 import { DomainTab } from '@/components/settings/domain-tab'
 import { WorkspaceTab } from '@/components/settings/workspace-tab'
+import { IngestionTab } from '@/components/settings/ingestion-tab'
 
-type SettingsTab = 'members' | 'domain' | 'workspace'
+type SettingsTab = 'members' | 'domain' | 'workspace' | 'ingestion'
 
 const TABS: { id: SettingsTab; label: string }[] = [
   { id: 'members', label: 'Members' },
   { id: 'domain', label: 'Domain' },
   { id: 'workspace', label: 'Workspace' },
+  { id: 'ingestion', label: 'Ingestion' },
 ]
 
 export default function SettingsPage() {
@@ -43,6 +45,7 @@ export default function SettingsPage() {
         {activeTab === 'members' && <MembersTab />}
         {activeTab === 'domain' && <DomainTab />}
         {activeTab === 'workspace' && <WorkspaceTab />}
+        {activeTab === 'ingestion' && <IngestionTab />}
       </div>
     </div>
   )
