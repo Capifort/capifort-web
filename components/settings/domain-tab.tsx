@@ -1,9 +1,9 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { Building2, Check, ChevronDown, X } from 'lucide-react'
+import { Building2, Check, ChevronDown, Plus, X } from 'lucide-react'
 import { useAuth } from '@/context/auth-context'
-import { listAdminDomains, type Domain } from '@/lib/domain-api'
+import { createDomain, listAdminDomains, type Domain } from '@/lib/domain-api'
 import { Spinner } from '@/components/spinner'
 
 function Banner({ tone, children, onClose }: { tone: 'error' | 'success'; children: React.ReactNode; onClose: () => void }) {
@@ -32,6 +32,9 @@ export function DomainTab() {
   const [selectedDomainId, setSelectedDomainId] = useState('')
   const [dropdownOpen, setDropdownOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
+  const [newName, setNewName] = useState('')
+  const [newEntityType, setNewEntityType] = useState('business')
+  const [creating, setCreating] = useState(false)
   const selectedDomain = domains.find((d) => d.id === selectedDomainId)
 
   useEffect(() => {
@@ -77,6 +80,26 @@ export function DomainTab() {
       setError(err.message || 'Failed to switch domain.')
     } finally {
       setSwitching(false)
+    }
+  }
+
+  const handleCreate = async (event: React.FormEvent) => {
+    event.preventDefault()
+    const name = newName.trim()
+    if (!name) return
+    setError('')
+    setSuccess('')
+    setCreating(true)
+    try {
+      const domain = await createDomain(name, newEntityType)
+      setDomains((prev) => [...prev, domain])
+      setSelectedDomainId(domain.id)
+      setNewName('')
+      setSuccess(`Created ${domain.name}. Select "Switch domain" to move into it.`)
+    } catch (err: any) {
+      setError(err.message || 'Failed to create domain.')
+    } finally {
+      setCreating(false)
     }
   }
 
@@ -175,6 +198,39 @@ export function DomainTab() {
           </div>
         )}
       </div>
+
+      <form onSubmit={handleCreate} className="rounded-xl border border-slate-200 bg-white p-6">
+        <h2 className="flex items-center gap-2 text-sm font-semibold text-slate-900">
+          <Plus size={16} strokeWidth={1.9} className="text-violet-600" />
+          Create domain
+        </h2>
+        <p className="mt-1 text-sm text-slate-500">Add a new organization. You become its owner.</p>
+        <div className="mt-5 flex flex-wrap items-start gap-3">
+          <input
+            value={newName}
+            onChange={(e) => setNewName(e.target.value)}
+            placeholder="Domain name"
+            maxLength={120}
+            className="w-full max-w-sm flex-1 rounded-lg border border-slate-200 px-4 py-3 text-sm text-slate-900 outline-none focus:border-violet-400"
+          />
+          <select
+            value={newEntityType}
+            onChange={(e) => setNewEntityType(e.target.value)}
+            className="rounded-lg border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none focus:border-violet-400"
+          >
+            <option value="business">Business</option>
+            <option value="enterprise">Enterprise</option>
+          </select>
+          <button
+            type="submit"
+            disabled={creating || !newName.trim()}
+            className="flex items-center justify-center gap-2 rounded-lg bg-slate-900 px-4 py-3 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-50"
+          >
+            {creating && <Spinner size={14} />}
+            {creating ? 'Creating…' : 'Create domain'}
+          </button>
+        </div>
+      </form>
     </div>
   )
 }

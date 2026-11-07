@@ -28,3 +28,9 @@ export const switchDomain = (domainId: string): Promise<SwitchDomainResult> =>
     method: 'POST',
     body: JSON.stringify({ domain_id: domainId }),
   })
+
+export const createDomain = (name: string, entityType: string): Promise<Domain> =>
+  apiFetch('/api/domains', {
+    method: 'POST',
+    body: JSON.stringify({ name, entity_type: entityType }),
+  })
