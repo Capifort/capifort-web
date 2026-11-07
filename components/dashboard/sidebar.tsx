@@ -3,11 +3,12 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { FileText, BarChart3, Database, ChevronsUpDown, Settings, LogOut } from 'lucide-react'
+import { FileText, BarChart3, Database, ChevronsUpDown, Settings, LogOut, Search } from 'lucide-react'
 import { useAuth } from '@/context/auth-context'
 
 const navItems = [
   { href: '/dashboard', label: 'Investigate', subtitle: 'Ask. Discover. Decide.' },
+  { href: '/dashboard/search', label: 'Search', icon: Search, isNew: true },
   { href: '/dashboard/files', label: 'Documents', icon: FileText },
   { href: '/dashboard/reports', label: 'Reports', icon: BarChart3 },
   { href: '/dashboard/memory', label: 'Memory', icon: Database },
@@ -98,7 +99,7 @@ export function Sidebar() {
         </div>
 
         <nav className="space-y-5">
-          {navItems.map(({ href, label, subtitle, icon: Icon }) => {
+          {navItems.map(({ href, label, subtitle, icon: Icon, isNew }) => {
             const active = href === '/dashboard' ? pathname === href : pathname.startsWith(href)
             return (
               <Link key={href} href={href} className="flex items-start gap-3">
@@ -108,8 +109,11 @@ export function Sidebar() {
                   <span className={`mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full ${active ? 'bg-slate-900' : 'bg-slate-300'}`} />
                 )}
                 <span>
-                  <span className={`block text-sm ${active ? 'font-medium text-slate-900' : 'text-slate-500'}`}>
+                  <span className={`flex items-center gap-1.5 text-sm ${active ? 'font-medium text-slate-900' : 'text-slate-500'}`}>
                     {label}
+                    {isNew && (
+                      <span className="rounded-full bg-violet-50 px-1.5 text-[10px] font-medium leading-4 text-violet-600">new</span>
+                    )}
                   </span>
                   {subtitle && <span className="block text-xs text-slate-400">{subtitle}</span>}
                 </span>
