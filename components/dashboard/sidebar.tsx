@@ -3,11 +3,12 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { FileText, BarChart3, Database, ChevronsUpDown, Settings, LogOut, Search } from 'lucide-react'
+import { FileText, BarChart3, Database, ChevronsUpDown, Settings, LogOut, Search, ListChecks } from 'lucide-react'
 import { useAuth } from '@/context/auth-context'
 
 const navItems = [
-  { href: '/dashboard', label: 'Investigate', subtitle: 'Ask. Discover. Decide.' },
+  { href: '/dashboard', label: 'Sherlock', subtitle: 'Ask. Discover. Decide.' },
+  { href: '/dashboard/investigations', label: 'Casebook', icon: ListChecks, isNew: true },
   { href: '/dashboard/search', label: 'Search', icon: Search, isNew: true },
   { href: '/dashboard/files', label: 'Documents', icon: FileText },
   { href: '/dashboard/reports', label: 'Reports', icon: BarChart3 },
