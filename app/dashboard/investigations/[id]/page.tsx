@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
-import { AlertTriangle, ChevronLeft } from 'lucide-react'
+import { AlertTriangle, ChevronLeft, FileText, Table2 } from 'lucide-react'
 import { useAuth } from '@/context/auth-context'
 import { Spinner } from '@/components/spinner'
 import {
@@ -14,6 +14,8 @@ import {
   TERMINAL_STATUSES,
   type InvestigationDetail,
   type InvestigationStep,
+  type SearchPassage,
+  type SearchSummary,
   type SherlockEvent,
 } from '@/lib/sherlock-api'
 
@@ -69,6 +71,9 @@ function applyEvent(detail: InvestigationDetail, event: SherlockEvent): Investig
       investigation: { ...detail.investigation, status: payload.status, error: payload.error || null },
     }
   }
+  if (event.type === 'search.completed') {
+    return { ...detail, search: payload as SearchSummary, last_event_id: event.id }
+  }
   if (!event.type.startsWith('step.') || !payload.step_key) {
     return { ...detail, last_event_id: event.id }
   }
@@ -86,6 +91,69 @@ function applyEvent(detail: InvestigationDetail, event: SherlockEvent): Investig
     }
   })
   return { ...detail, steps, last_event_id: event.id }
+}
+
+function passageLocation(location: SearchPassage['location']) {
+  if (location.sheet) return `${location.sheet} · rows ${location.row_start}–${location.row_end}`
+  if (location.page) return `page ${location.page}`
+  return ''
+}
+
+function SearchCard({ search }: { search: SearchSummary | null }) {
+  if (!search) {
+    return (
+      <div className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-3 text-xs text-slate-400">
+        <StatusDot status="running" /> Searching the knowledge index…
+      </div>
+    )
+  }
+  return (
+    <div className="rounded-xl border border-slate-200 bg-white p-4">
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+        <p className="text-sm font-semibold text-slate-900">Sources found first</p>
+        <p className="text-xs text-slate-400">
+          {search.counts.passages} passages · {search.counts.facts} facts · {search.counts.entities} entities ·{' '}
+          {search.took_ms} ms
+          {search.degraded.length > 0 && (
+            <span className="ml-2 rounded-full bg-amber-50 px-1.5 text-[10px] font-medium leading-4 text-amber-700">
+              degraded: {search.degraded.join(', ')}
+            </span>
+          )}
+        </p>
+      </div>
+      {search.status === 'not_found' && (
+        <p className="text-xs text-slate-500">Nothing in this workspace matches the question yet.</p>
+      )}
+      <ul className="flex flex-wrap gap-2">
+        {search.sources.map((source) => (
+          <li
+            key={source.file_id}
+            className="flex items-center gap-1.5 rounded-full border border-slate-200 px-2.5 py-1 text-xs text-slate-700"
+          >
+            {source.tabular ? (
+              <Table2 size={12} strokeWidth={1.75} className="text-emerald-600" />
+            ) : (
+              <FileText size={12} strokeWidth={1.75} className="text-slate-400" />
+            )}
+            {source.file_name}
+            <span className="text-slate-400">· {source.hits}</span>
+          </li>
+        ))}
+      </ul>
+      {search.passages.length > 0 && (
+        <ol className="mt-3 space-y-2">
+          {search.passages.slice(0, 3).map((passage) => (
+            <li key={passage.chunk_id} className="rounded-lg bg-[#FBFAF7] px-3 py-2 text-xs">
+              <p className="text-slate-400">
+                {passage.file_name} · {passageLocation(passage.location)}
+              </p>
+              <p className="mt-0.5 line-clamp-2 text-slate-700">{passage.text}</p>
+            </li>
+          ))}
+        </ol>
+      )}
+    </div>
+  )
 }
 
 function StepDetail({ step }: { step: InvestigationStep }) {
@@ -267,6 +335,10 @@ export default function InvestigationPage() {
             <AlertTriangle size={14} />
             {errorMessage || investigation.error?.message}
           </div>
+        )}
+
+        {(detail.search || ['starting', 'running'].includes(investigation.status)) && (
+          <SearchCard search={detail.search} />
         )}
 
         {!plan && <p className="text-sm text-slate-400">This investigation has no plan yet.</p>}

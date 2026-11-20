@@ -8,10 +8,12 @@ import {
   getFolderContents,
   createFolder,
   uploadFile,
+  type FileItem,
   type Folder,
   type FolderContents,
 } from '@/lib/file-api'
 import { Spinner } from '@/components/spinner'
+import { DocumentViewer } from '@/components/document-viewer'
 
 function formatBytes(bytes: number | null) {
   if (!bytes) return '—'
@@ -128,6 +130,7 @@ export default function FilesPage() {
   const [newFolderOpen, setNewFolderOpen] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [uploadError, setUploadError] = useState('')
+  const [viewingFile, setViewingFile] = useState<FileItem | null>(null)
 
   const loadContents = (folderId: string) => {
     if (!workspaceId) return
@@ -238,6 +241,10 @@ export default function FilesPage() {
 
       {newFolderOpen && <NewFolderModal onClose={() => setNewFolderOpen(false)} onCreate={handleCreateFolder} />}
 
+      {viewingFile && (
+        <DocumentViewer workspaceId={workspaceId} file={viewingFile} onClose={() => setViewingFile(null)} />
+      )}
+
       <div className="px-8 py-8">
         <div className="mb-6 flex items-center gap-2 text-sm">
           {breadcrumb.map((crumb, i) => (
@@ -279,7 +286,11 @@ export default function FilesPage() {
                 </button>
               ))}
               {contents.files.map((file) => (
-                <div key={file.id} className="flex items-center gap-3 px-5 py-3">
+                <button
+                  key={file.id}
+                  onClick={() => setViewingFile(file)}
+                  className="flex w-full items-center gap-3 px-5 py-3 text-left hover:bg-slate-50"
+                >
                   <FileTypeBadge extension={file.extension} />
                   <span className="min-w-0 flex-1 truncate text-sm text-slate-700">{file.name}</span>
                   <span className="flex-shrink-0 text-xs text-slate-400">{formatBytes(file.size)}</span>
@@ -287,7 +298,7 @@ export default function FilesPage() {
                     {(file.status === 'pending' || file.status === 'uploading') && <Spinner size={12} />}
                     {file.status}
                   </span>
-                </div>
+                </button>
               ))}
             </div>
           </div>
