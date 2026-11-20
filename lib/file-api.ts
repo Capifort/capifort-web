@@ -58,6 +58,13 @@ export interface FileDownload {
   expires_in_seconds: number
 }
 
+export interface FileView {
+  file_id: string
+  name: string
+  view_url: string
+  expires_in_seconds: number
+}
+
 export interface FolderContents {
   folder: Folder
   subfolders: Folder[]
@@ -128,6 +135,9 @@ export const getFileDownloadUrl = (
   versionId?: string
 ): Promise<FileDownload> =>
   apiFetch(`/api/workspaces/${workspaceId}/files/${fileId}/download${versionId ? `?version_id=${versionId}` : ''}`)
+
+export const getFileViewUrl = (workspaceId: string, fileId: string): Promise<FileView> =>
+  apiFetch(`/api/workspaces/${workspaceId}/files/${fileId}/view`)
 
 export const listFileVersions = (workspaceId: string, fileId: string): Promise<FileVersion[]> =>
   apiFetch(`/api/workspaces/${workspaceId}/files/${fileId}/versions`)

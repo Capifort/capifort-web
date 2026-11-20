@@ -53,10 +53,38 @@ export interface InvestigationStep {
   finished_at: string | null
 }
 
+export interface SearchSource {
+  file_id: string
+  file_version_id: string
+  file_name: string
+  tabular: boolean
+  hits: number
+  score: number
+}
+
+export interface SearchPassage {
+  chunk_id: string
+  file_name: string
+  location: { page?: number; sheet?: string; row_start?: number; row_end?: number }
+  text: string
+  score: number
+}
+
+export interface SearchSummary {
+  query: string
+  status: 'found' | 'not_found'
+  degraded: string[]
+  took_ms: number
+  counts: { passages: number; facts: number; entities: number }
+  sources: SearchSource[]
+  passages: SearchPassage[]
+}
+
 export interface InvestigationDetail {
   investigation: Investigation
   plan: Plan | null
   steps: InvestigationStep[]
+  search: SearchSummary | null
   last_event_id: number
 }
 
