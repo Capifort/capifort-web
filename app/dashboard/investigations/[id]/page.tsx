@@ -367,7 +367,7 @@ export default function InvestigationPage() {
             className="mb-2 inline-flex items-center gap-1 text-xs text-slate-500 hover:text-slate-900"
           >
             <ChevronLeft size={13} strokeWidth={1.75} />
-            Casebook
+            AuditBook
           </Link>
           <p className="text-[11px] uppercase tracking-[0.14em] text-slate-400">Sherlock investigation</p>
           <h1 className="mt-1 text-lg font-semibold text-slate-900">{investigation.question}</h1>
