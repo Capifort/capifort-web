@@ -60,6 +60,10 @@ const PLANNER_WORKING = ['interpreting', 'planning']
 // These events carry new intent, questions or plan versions, so the page reloads the detail
 const PLANNER_EVENTS = ['intent.ready', 'plan.drafted']
 const RECONNECT_MS = 2000
+// Proxies such as the Next dev rewrite can hold back the event stream, so while
+// Sherlock is working the page also reloads on a timer
+const POLLED_STATUSES = ['interpreting', 'planning', 'starting', 'running']
+const POLL_MS = 3000
 
 function StatusDot({ status }: { status: string }) {
   return <span className={`h-1.5 w-1.5 flex-shrink-0 rounded-full ${STATUS_DOTS[status] || 'bg-slate-300'}`} />
@@ -266,6 +270,15 @@ export default function InvestigationPage() {
       controller.abort()
     }
   }, [workspaceId, id, load, followAttempt])
+
+  const currentStatus = detail?.investigation.status
+  useEffect(() => {
+    if (!currentStatus || !POLLED_STATUSES.includes(currentStatus)) return
+    const timer = setInterval(() => {
+      load().catch(() => {})
+    }, POLL_MS)
+    return () => clearInterval(timer)
+  }, [currentStatus, load])
 
   const approve = async (version: number) => {
     if (!workspaceId || !id) return
