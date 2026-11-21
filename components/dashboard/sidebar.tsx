@@ -8,7 +8,7 @@ import { useAuth } from '@/context/auth-context'
 
 const navItems = [
   { href: '/dashboard', label: 'Sherlock', subtitle: 'Ask. Discover. Decide.' },
-  { href: '/dashboard/investigations', label: 'Casebook', icon: ListChecks, isNew: true },
+  { href: '/dashboard/investigations', label: 'AuditBook', icon: ListChecks, isNew: true },
   { href: '/dashboard/search', label: 'Search', icon: Search, isNew: true },
   { href: '/dashboard/files', label: 'Documents', icon: FileText },
   { href: '/dashboard/reports', label: 'Reports', icon: BarChart3 },

@@ -101,7 +101,7 @@ export default function InvestigationsPage() {
     <div className="min-h-dvh">
       <div className="flex flex-wrap items-end justify-between gap-3 border-b border-slate-100 bg-white px-5 py-6 sm:px-8">
         <div>
-          <h1 className="text-lg font-semibold text-slate-900">Casebook</h1>
+          <h1 className="text-lg font-semibold text-slate-900">AuditBook</h1>
           <p className="mt-1 text-sm text-slate-500">Every Sherlock investigation in this workspace.</p>
         </div>
         {SHOW_TEST_BUTTON && (
@@ -130,7 +130,7 @@ export default function InvestigationsPage() {
         {investigations?.length === 0 && (
           <div className="flex flex-col items-center gap-2 py-14 text-center">
             <span className="h-12 w-12 rounded-full border border-dashed border-slate-300" />
-            <p className="text-sm font-semibold text-slate-900">Your casebook is empty</p>
+            <p className="text-sm font-semibold text-slate-900">Your AuditBook is empty</p>
             <p className="max-w-md text-sm text-slate-500">
               {SHOW_TEST_BUTTON
                 ? 'Create a test investigation to watch Sherlock run a plan.'
