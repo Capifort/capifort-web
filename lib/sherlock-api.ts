@@ -4,6 +4,9 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || ''
 
 export type InvestigationStatus =
   | 'draft'
+  | 'interpreting'
+  | 'clarifying'
+  | 'planning'
   | 'awaiting_approval'
   | 'starting'
   | 'running'
@@ -15,15 +18,58 @@ export type InvestigationStatus =
 
 export type StepStatus = 'pending' | 'after_review' | 'running' | 'completed' | 'failed' | 'cancelled'
 
+export interface PlannerQuestion {
+  id: string
+  param: string
+  affects: 'population' | 'criteria' | 'classification'
+  text: string
+  why: string
+  options: { value: string; label: string }[]
+  suggested: string
+}
+
+export interface InvestigationIntent {
+  understood?: string
+  objective?: string
+  process?: string
+  entities_needed?: string[]
+  conditions?: { id: string; description: string }[]
+  scope?: { period_start: string; period_end: string; legal_entities: string[]; other: string }
+  assumptions?: { key: string; value: string }[]
+  questions?: PlannerQuestion[]
+  answers?: Record<string, string>
+  sources?: { file_id: string; file_name: string; tabular: boolean }[]
+}
+
+export interface PlanStep {
+  key: string
+  title?: string
+  type?: string
+  agent?: string
+  why?: string
+  after?: string[]
+  inputs?: Record<string, string>
+  params?: Record<string, unknown>
+  outputs?: string[]
+  gate?: string
+}
+
+export interface PlanValidationError {
+  code: string
+  step_key: string | null
+  message: string
+}
+
 export interface Investigation {
   id: string
   workspace_id: string
   question: string
+  intent: InvestigationIntent | null
   status: InvestigationStatus
   current_plan_id: string | null
   approved_plan_id: string | null
   workflow_id: string | null
-  error: { message?: string } | null
+  error: { message?: string; code?: string } | null
   created_at: string
   updated_at: string | null
 }
@@ -31,7 +77,15 @@ export interface Investigation {
 export interface Plan {
   id: string
   version: number
-  body: { steps: unknown[]; [key: string]: unknown }
+  body: {
+    steps: PlanStep[]
+    objective?: string
+    understood?: string
+    assumptions?: { key: string; value: string }[]
+    answers?: { question: string; answer: string }[]
+    [key: string]: unknown
+  }
+  validation: { valid?: boolean; errors?: PlanValidationError[] } | null
   approved_by: string | null
   approved_at: string | null
 }
@@ -108,8 +162,29 @@ export const getInvestigation = (workspaceId: string, investigationId: string): 
 export const cancelInvestigation = (workspaceId: string, investigationId: string): Promise<InvestigationDetail> =>
   apiFetch(`${base(workspaceId)}/${investigationId}/cancel`, { method: 'POST' })
 
-export const createInvestigation = (workspaceId: string, question: string): Promise<Investigation> =>
-  apiFetch(base(workspaceId), { method: 'POST', body: JSON.stringify({ question }) })
+export const createInvestigation = (workspaceId: string, question: string, autoPlan = true): Promise<Investigation> =>
+  apiFetch(base(workspaceId), { method: 'POST', body: JSON.stringify({ question, auto_plan: autoPlan }) })
+
+export const answerQuestions = (
+  workspaceId: string,
+  investigationId: string,
+  answers: Record<string, string>
+): Promise<InvestigationDetail> =>
+  apiFetch(`${base(workspaceId)}/${investigationId}/answers`, { method: 'POST', body: JSON.stringify({ answers }) })
+
+export const revisePlan = (
+  workspaceId: string,
+  investigationId: string,
+  version: number,
+  instruction: string
+): Promise<InvestigationDetail> =>
+  apiFetch(`${base(workspaceId)}/${investigationId}/plans/${version}/revise`, {
+    method: 'POST',
+    body: JSON.stringify({ instruction }),
+  })
+
+export const retryPlanning = (workspaceId: string, investigationId: string): Promise<InvestigationDetail> =>
+  apiFetch(`${base(workspaceId)}/${investigationId}/retry-planning`, { method: 'POST' })
 
 export const addPlan = (workspaceId: string, investigationId: string, steps: unknown[]): Promise<Plan> =>
   apiFetch(`${base(workspaceId)}/${investigationId}/plans`, {

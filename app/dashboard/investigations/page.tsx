@@ -10,6 +10,9 @@ import { addPlan, createInvestigation, listInvestigations, type Investigation } 
 
 const STATUS_LABELS: Record<string, string> = {
   draft: 'Draft',
+  interpreting: 'Reading your question',
+  clarifying: 'Needs your answers',
+  planning: 'Drafting the plan',
   awaiting_approval: 'Awaiting approval',
   starting: 'Starting',
   running: 'In progress',
@@ -21,6 +24,9 @@ const STATUS_LABELS: Record<string, string> = {
 }
 
 const STATUS_DOTS: Record<string, string> = {
+  interpreting: 'bg-sky-500',
+  planning: 'bg-sky-500',
+  clarifying: 'bg-amber-400',
   starting: 'bg-sky-500',
   running: 'bg-sky-500',
   in_review: 'bg-emerald-500',
@@ -78,7 +84,7 @@ export default function InvestigationsPage() {
     setCreating(true)
     setErrorMessage('')
     try {
-      const investigation = await createInvestigation(workspaceId, TEST_QUESTION)
+      const investigation = await createInvestigation(workspaceId, TEST_QUESTION, false)
       await addPlan(workspaceId, investigation.id, TEST_STEPS)
       router.push(`/dashboard/investigations/${investigation.id}`)
     } catch (error: any) {

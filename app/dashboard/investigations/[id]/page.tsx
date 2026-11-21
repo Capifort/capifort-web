@@ -6,10 +6,14 @@ import { useParams } from 'next/navigation'
 import { AlertTriangle, ChevronLeft, FileText, Table2 } from 'lucide-react'
 import { useAuth } from '@/context/auth-context'
 import { Spinner } from '@/components/spinner'
+import { ClarifyCard, IntentCard, PlannerWorking, PlanReview } from '@/components/sherlock/ask-and-plan'
 import {
+  answerQuestions,
   approvePlan,
   cancelInvestigation,
   getInvestigation,
+  retryPlanning,
+  revisePlan,
   streamInvestigationEvents,
   TERMINAL_STATUSES,
   type InvestigationDetail,
@@ -21,6 +25,9 @@ import {
 
 const STATUS_LABELS: Record<string, string> = {
   draft: 'Draft',
+  interpreting: 'Reading your question',
+  clarifying: 'Needs your answers',
+  planning: 'Drafting the plan',
   awaiting_approval: 'Awaiting approval',
   starting: 'Starting',
   running: 'In progress',
@@ -34,6 +41,9 @@ const STATUS_LABELS: Record<string, string> = {
 }
 
 const STATUS_DOTS: Record<string, string> = {
+  interpreting: 'bg-sky-500 animate-pulse',
+  planning: 'bg-sky-500 animate-pulse',
+  clarifying: 'bg-amber-400',
   starting: 'bg-sky-500 animate-pulse',
   running: 'bg-sky-500 animate-pulse',
   completed: 'bg-emerald-500',
@@ -46,6 +56,9 @@ const STATUS_DOTS: Record<string, string> = {
 }
 
 const CANCELLABLE = ['starting', 'running', 'paused']
+const PLANNER_WORKING = ['interpreting', 'planning']
+// These events carry new intent, questions or plan versions, so the page reloads the detail
+const PLANNER_EVENTS = ['intent.ready', 'plan.drafted']
 const RECONNECT_MS = 2000
 
 function StatusDot({ status }: { status: string }) {
@@ -204,6 +217,9 @@ export default function InvestigationPage() {
   const [errorMessage, setErrorMessage] = useState('')
   const [cancelling, setCancelling] = useState(false)
   const [approving, setApproving] = useState(false)
+  const [answering, setAnswering] = useState(false)
+  const [revising, setRevising] = useState(false)
+  const [followAttempt, setFollowAttempt] = useState(0)
   const lastEventId = useRef(0)
 
   const load = useCallback(async () => {
@@ -231,6 +247,7 @@ export default function InvestigationPage() {
             (event) => {
               lastEventId.current = event.id
               setDetail((current) => (current ? applyEvent(current, event) : current))
+              if (PLANNER_EVENTS.includes(event.type)) load()
             },
             controller.signal
           )
@@ -248,7 +265,7 @@ export default function InvestigationPage() {
       stopped = true
       controller.abort()
     }
-  }, [workspaceId, id, load])
+  }, [workspaceId, id, load, followAttempt])
 
   const approve = async (version: number) => {
     if (!workspaceId || !id) return
@@ -260,6 +277,44 @@ export default function InvestigationPage() {
       setErrorMessage(error?.message || 'Approval failed.')
     } finally {
       setApproving(false)
+    }
+  }
+
+  const submitAnswers = async (answers: Record<string, string>) => {
+    if (!workspaceId || !id) return
+    setAnswering(true)
+    setErrorMessage('')
+    try {
+      setDetail(await answerQuestions(workspaceId, id, answers))
+    } catch (error: any) {
+      setErrorMessage(error?.message || 'Could not send your answers.')
+    } finally {
+      setAnswering(false)
+    }
+  }
+
+  const requestRevision = async (version: number, instruction: string) => {
+    if (!workspaceId || !id) return
+    setRevising(true)
+    setErrorMessage('')
+    try {
+      setDetail(await revisePlan(workspaceId, id, version, instruction))
+    } catch (error: any) {
+      setErrorMessage(error?.message || 'Could not request the revision.')
+    } finally {
+      setRevising(false)
+    }
+  }
+
+  const retryPlanner = async () => {
+    if (!workspaceId || !id) return
+    setErrorMessage('')
+    try {
+      setDetail(await retryPlanning(workspaceId, id))
+      // A failed investigation closed its event stream; open a new one
+      setFollowAttempt((attempt) => attempt + 1)
+    } catch (error: any) {
+      setErrorMessage(error?.message || 'Could not restart planning.')
     }
   }
 
@@ -309,15 +364,6 @@ export default function InvestigationPage() {
             {plan && <span className="text-slate-400">· plan v{plan.version} · {finished} of {steps.length} steps done</span>}
           </p>
         </div>
-        {investigation.status === 'awaiting_approval' && plan && (
-          <button
-            onClick={() => approve(plan.version)}
-            disabled={approving}
-            className="rounded-full bg-slate-900 px-4 py-1.5 text-xs font-medium text-white hover:bg-slate-800 disabled:opacity-40"
-          >
-            {approving ? 'Starting…' : `Approve v${plan.version} and run`}
-          </button>
-        )}
         {CANCELLABLE.includes(investigation.status) && (
           <button
             onClick={cancel}
@@ -334,16 +380,46 @@ export default function InvestigationPage() {
           <div className="flex items-center gap-2 rounded-xl border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-700">
             <AlertTriangle size={14} />
             {errorMessage || investigation.error?.message}
+            {investigation.error?.code === 'planner' && investigation.status === 'failed' && (
+              <button
+                onClick={retryPlanner}
+                className="ml-auto rounded-full border border-red-200 bg-white px-3 py-1 text-xs font-medium text-red-700 hover:border-red-300"
+              >
+                Try again
+              </button>
+            )}
           </div>
+        )}
+
+        {PLANNER_WORKING.includes(investigation.status) && <PlannerWorking status={investigation.status} />}
+
+        {investigation.intent?.understood && ['interpreting', 'clarifying', 'planning', 'awaiting_approval'].includes(investigation.status) && (
+          <IntentCard intent={investigation.intent} />
+        )}
+
+        {investigation.status === 'clarifying' && investigation.intent?.questions && (
+          <ClarifyCard questions={investigation.intent.questions} submitting={answering} onSubmit={submitAnswers} />
+        )}
+
+        {investigation.status === 'awaiting_approval' && plan && (
+          <PlanReview
+            plan={plan}
+            approving={approving}
+            revising={revising}
+            onApprove={() => approve(plan.version)}
+            onRevise={(instruction) => requestRevision(plan.version, instruction)}
+          />
         )}
 
         {(detail.search || ['starting', 'running'].includes(investigation.status)) && (
           <SearchCard search={detail.search} />
         )}
 
-        {!plan && <p className="text-sm text-slate-400">This investigation has no plan yet.</p>}
+        {!plan && investigation.status === 'draft' && (
+          <p className="text-sm text-slate-400">This investigation has no plan yet.</p>
+        )}
 
-        {plan && (
+        {plan && !['awaiting_approval', 'planning'].includes(investigation.status) && (
           <div className="grid gap-4 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
             <ol className="rounded-xl border border-slate-200 bg-white py-1.5">
               {steps.map((step, index) => (
