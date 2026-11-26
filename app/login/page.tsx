@@ -4,31 +4,9 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
-import { Mail, Lock, Eye, EyeOff, ArrowRight, Apple } from 'lucide-react'
+import { Mail, Lock, Eye, EyeOff, ArrowRight } from 'lucide-react'
 import { useAuth } from '@/context/auth-context'
 import { Spinner } from '@/components/spinner'
-
-function GoogleIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true">
-      <path fill="#4285F4" d="M23.49 12.27c0-.79-.07-1.54-.19-2.27H12v4.51h6.47c-.29 1.48-1.14 2.73-2.4 3.58v3h3.86c2.26-2.09 3.56-5.17 3.56-8.82z" />
-      <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.86-3c-1.08.72-2.45 1.16-4.07 1.16-3.13 0-5.78-2.11-6.73-4.96H1.29v3.09C3.26 21.3 7.31 24 12 24z" />
-      <path fill="#FBBC05" d="M5.27 14.29c-.25-.72-.38-1.49-.38-2.29s.14-1.57.38-2.29V6.62H1.29A11.97 11.97 0 0 0 0 12c0 1.93.46 3.76 1.29 5.38l3.98-3.09z" />
-      <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.31 0 3.26 2.7 1.29 6.62l3.98 3.09C6.22 6.86 8.87 4.75 12 4.75z" />
-    </svg>
-  )
-}
-
-function MicrosoftIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true">
-      <rect x="1" y="1" width="10" height="10" fill="#F25022" />
-      <rect x="13" y="1" width="10" height="10" fill="#7FBA00" />
-      <rect x="1" y="13" width="10" height="10" fill="#00A4EF" />
-      <rect x="13" y="13" width="10" height="10" fill="#FFB900" />
-    </svg>
-  )
-}
 
 export default function LoginPage() {
   const [username, setUsername] = useState('')
@@ -141,27 +119,6 @@ export default function LoginPage() {
               {!submitting && <ArrowRight size={16} strokeWidth={2} />}
             </button>
           </form>
-
-          <div className="mt-6 flex items-center gap-3">
-            <div className="h-px flex-1 bg-slate-200" />
-            <span className="text-[11px] font-medium tracking-wide text-slate-400">OR CONTINUE WITH</span>
-            <div className="h-px flex-1 bg-slate-200" />
-          </div>
-
-          <div className="mt-4 grid grid-cols-3 gap-3">
-            <button className="flex items-center justify-center gap-2 rounded-lg border border-slate-200 py-2.5 text-sm text-slate-700 hover:bg-slate-50">
-              <GoogleIcon />
-              Google
-            </button>
-            <button className="flex items-center justify-center gap-2 rounded-lg border border-slate-200 py-2.5 text-sm text-slate-700 hover:bg-slate-50">
-              <MicrosoftIcon />
-              Microsoft
-            </button>
-            <button className="flex items-center justify-center gap-2 rounded-lg border border-slate-200 py-2.5 text-sm text-slate-700 hover:bg-slate-50">
-              <Apple size={16} strokeWidth={1.75} />
-              Apple
-            </button>
-          </div>
         </div>
 
         <div className="flex flex-col gap-3 pt-8 text-xs text-slate-400 sm:flex-row sm:items-center sm:justify-between">
