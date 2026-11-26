@@ -134,12 +134,49 @@ export interface SearchSummary {
   passages: SearchPassage[]
 }
 
+export interface ReviewSubmission {
+  user_id: string
+  confirmed_case_ids: string[]
+}
+
+export interface FindingSentence {
+  text: string
+  refs: string[]
+}
+
+export interface Finding {
+  group: string
+  title: string
+  condition: FindingSentence[]
+  criteria: FindingSentence[]
+  cause: string
+  effect: string
+  recommendation: string
+}
+
+export interface FindingsDraft {
+  status: string
+  findings: Finding[]
+  references: Record<string, string>
+  suggested_fields: string[]
+}
+
 export interface InvestigationDetail {
   investigation: Investigation
   plan: Plan | null
   steps: InvestigationStep[]
   search: SearchSummary | null
+  review: ReviewSubmission | null
+  findings: FindingsDraft | null
   last_event_id: number
+}
+
+export interface CaseList {
+  dataset_id: string | null
+  total: number
+  limit: number
+  columns: string[]
+  cases: Record<string, unknown>[]
 }
 
 export interface SherlockEvent {
@@ -194,6 +231,19 @@ export const addPlan = (workspaceId: string, investigationId: string, steps: unk
 
 export const approvePlan = (workspaceId: string, investigationId: string, version: number): Promise<InvestigationDetail> =>
   apiFetch(`${base(workspaceId)}/${investigationId}/plans/${version}/approve`, { method: 'POST' })
+
+export const listCases = (workspaceId: string, investigationId: string): Promise<CaseList> =>
+  apiFetch(`${base(workspaceId)}/${investigationId}/cases`)
+
+export const submitReview = (
+  workspaceId: string,
+  investigationId: string,
+  confirmedCaseIds: string[]
+): Promise<InvestigationDetail> =>
+  apiFetch(`${base(workspaceId)}/${investigationId}/review`, {
+    method: 'POST',
+    body: JSON.stringify({ confirmed_case_ids: confirmedCaseIds }),
+  })
 
 export async function streamInvestigationEvents(
   workspaceId: string,
