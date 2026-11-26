@@ -8,8 +8,8 @@ import { useAuth } from '@/context/auth-context'
 
 const navItems = [
   { href: '/dashboard', label: 'Sherlock', subtitle: 'Ask. Discover. Decide.' },
-  { href: '/dashboard/investigations', label: 'AuditBook', icon: ListChecks, isNew: true },
-  { href: '/dashboard/search', label: 'Search', icon: Search, isNew: true },
+  { href: '/dashboard/investigations', label: 'AuditBook', icon: ListChecks },
+  { href: '/dashboard/search', label: 'Search', icon: Search },
   { href: '/dashboard/files', label: 'Documents', icon: FileText },
   { href: '/dashboard/reports', label: 'Reports', icon: BarChart3, isComingSoon: true },
   { href: '/dashboard/memory', label: 'Memory', icon: Database, isComingSoon: true },
@@ -100,7 +100,7 @@ export function Sidebar() {
         </div>
 
         <nav className="space-y-5">
-          {navItems.map(({ href, label, subtitle, icon: Icon, isNew, isComingSoon }) => {
+          {navItems.map(({ href, label, subtitle, icon: Icon, isComingSoon }) => {
             const active = href === '/dashboard' ? pathname === href : pathname.startsWith(href)
             return (
               <Link key={href} href={href} className="flex items-start gap-3">
@@ -112,9 +112,6 @@ export function Sidebar() {
                 <span>
                   <span className={`flex items-center gap-1.5 text-sm ${active ? 'font-medium text-slate-900' : 'text-slate-500'}`}>
                     {label}
-                    {isNew && (
-                      <span className="rounded-full bg-violet-50 px-1.5 text-[10px] font-medium leading-4 text-violet-600">new</span>
-                    )}
                     {isComingSoon && (
                       <span className="rounded-full bg-amber-50 px-1.5 text-[10px] font-medium leading-4 text-amber-600">soon</span>
                     )}
