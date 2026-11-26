@@ -7,6 +7,7 @@ import { AlertTriangle, ChevronLeft, FileText, Table2 } from 'lucide-react'
 import { useAuth } from '@/context/auth-context'
 import { Spinner } from '@/components/spinner'
 import { ClarifyCard, IntentCard, PlannerWorking, PlanReview } from '@/components/sherlock/ask-and-plan'
+import { CaseReview, FindingsCard } from '@/components/sherlock/review-and-findings'
 import {
   answerQuestions,
   approvePlan,
@@ -15,6 +16,7 @@ import {
   retryPlanning,
   revisePlan,
   streamInvestigationEvents,
+  submitReview,
   TERMINAL_STATUSES,
   type InvestigationDetail,
   type InvestigationStep,
@@ -56,6 +58,9 @@ const STATUS_DOTS: Record<string, string> = {
 }
 
 const CANCELLABLE = ['starting', 'running', 'paused']
+// Matches the worker: only this step and agent wait for the auditor's review
+const FINDINGS_STEP = 'draft_findings'
+const FINDINGS_AGENT = 'finding_generator'
 const PLANNER_WORKING = ['interpreting', 'planning']
 // These events carry new intent, questions or plan versions, so the page reloads the detail
 const PLANNER_EVENTS = ['intent.ready', 'plan.drafted']
@@ -223,6 +228,7 @@ export default function InvestigationPage() {
   const [approving, setApproving] = useState(false)
   const [answering, setAnswering] = useState(false)
   const [revising, setRevising] = useState(false)
+  const [reviewing, setReviewing] = useState(false)
   const [followAttempt, setFollowAttempt] = useState(0)
   const lastEventId = useRef(0)
 
@@ -255,7 +261,11 @@ export default function InvestigationPage() {
             },
             controller.signal
           )
-          if (outcome === 'ended') return
+          if (outcome === 'ended') {
+            // Findings and the final step results arrive with the last events; reload once
+            await load()
+            return
+          }
           await new Promise((resolve) => setTimeout(resolve, RECONNECT_MS))
         }
       } catch (error: any) {
@@ -331,6 +341,21 @@ export default function InvestigationPage() {
     }
   }
 
+  const sendReview = async (confirmedCaseIds: string[]) => {
+    if (!workspaceId || !id) return
+    setReviewing(true)
+    setErrorMessage('')
+    try {
+      setDetail(await submitReview(workspaceId, id, confirmedCaseIds))
+      // The stream closed at in_review; open a new one to follow the findings step
+      setFollowAttempt((attempt) => attempt + 1)
+    } catch (error: any) {
+      setErrorMessage(error?.message || 'Could not submit the review.')
+    } finally {
+      setReviewing(false)
+    }
+  }
+
   const cancel = async () => {
     if (!workspaceId || !id) return
     setCancelling(true)
@@ -357,6 +382,7 @@ export default function InvestigationPage() {
   const { investigation, plan, steps } = detail
   const finished = steps.filter((step) => step.status === 'completed').length
   const selected = steps.find((step) => step.key === selectedKey) || steps.find((step) => step.status === 'running') || steps[0]
+  const waitsForReview = steps.some((step) => step.type === FINDINGS_STEP && step.agent === FINDINGS_AGENT)
 
   return (
     <div className="min-h-dvh">
@@ -423,6 +449,19 @@ export default function InvestigationPage() {
             onRevise={(instruction) => requestRevision(plan.version, instruction)}
           />
         )}
+
+        {investigation.status === 'in_review' && waitsForReview && (
+          <CaseReview workspaceId={workspaceId} investigationId={id} submitting={reviewing} onSubmit={sendReview} />
+        )}
+
+        {detail.review && (
+          <p className="text-xs text-slate-500">
+            Review submitted: {detail.review.confirmed_case_ids.length}{' '}
+            {detail.review.confirmed_case_ids.length === 1 ? 'case' : 'cases'} confirmed.
+          </p>
+        )}
+
+        {detail.findings && <FindingsCard draft={detail.findings} />}
 
         {(detail.search || ['starting', 'running'].includes(investigation.status)) && (
           <SearchCard search={detail.search} />
