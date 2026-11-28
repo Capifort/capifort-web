@@ -8,6 +8,7 @@ import { Spinner } from '@/components/spinner'
 pdfjs.GlobalWorkerOptions.workerSrc = new URL('pdfjs-dist/build/pdf.worker.min.mjs', import.meta.url).toString()
 
 const MAX_PAGE_WIDTH = 900
+const PDF_OPTIONS = { disableStream: true, disableAutoFetch: true, rangeChunkSize: 256 * 1024 }
 
 export type ViewerFocus = {
   page: number
@@ -44,6 +45,7 @@ export default function PdfPages({
     <div ref={containerRef} className="h-full w-full overflow-y-auto">
       <Document
         file={url}
+        options={PDF_OPTIONS}
         onLoadSuccess={(pdf) => {
           setPageCount(pdf.numPages)
           pdf.getPage(1).then((firstPage) => {
@@ -101,7 +103,7 @@ function LazyPage({
     const page = pageRef.current
     if (!page) return
     const observer = new IntersectionObserver(([entry]) => entry.isIntersecting && setIsVisible(true), {
-      rootMargin: '1200px 0px',
+      rootMargin: '400px 0px',
     })
     observer.observe(page)
     return () => observer.disconnect()

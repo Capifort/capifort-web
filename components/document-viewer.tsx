@@ -28,6 +28,7 @@ export function DocumentViewer({
   const [downloading, setDownloading] = useState(false)
 
   useEffect(() => {
+    import('@/components/pdf-pages')
     setStatus('loading')
     getFileViewUrl(workspaceId, file.id)
       .then((fileView) => {
