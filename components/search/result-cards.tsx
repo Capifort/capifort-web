@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import { ArrowUpRight } from 'lucide-react'
-import { getFileDownloadUrl } from '@/lib/file-api'
 import type {
   EntityResult,
   FactResult,
@@ -29,22 +28,11 @@ export function locationLabel(location: SearchLocation, short = false) {
   return ''
 }
 
-// The presigned URL arrives after a request; opening the tab first keeps
-// popup blockers from treating it as an unrequested popup.
-export async function openSource(
-  workspaceId: string,
-  fileId: string,
-  versionId: string | null,
+export type SearchSource = {
+  fileId: string
+  fileName: string
+  versionId: string | null
   location: SearchLocation
-) {
-  const sourceTab = window.open('', '_blank')
-  try {
-    const download = await getFileDownloadUrl(workspaceId, fileId, versionId || undefined)
-    const pageAnchor = location.page != null ? `#page=${location.page}` : ''
-    if (sourceTab) sourceTab.location.href = `${download.download_url}${pageAnchor}`
-  } catch {
-    sourceTab?.close()
-  }
 }
 
 function HighlightedText({ text, terms }: { text: string; terms: string[] }) {
@@ -97,11 +85,11 @@ function ScoreLabel({ score }: { score: number }) {
 export function PassageCard({
   passage,
   terms,
-  workspaceId,
+  onOpen,
 }: {
   passage: PassageResult
   terms: string[]
-  workspaceId: string
+  onOpen: (source: SearchSource) => void
 }) {
   const [expanded, setExpanded] = useState(false)
   const isLong = passage.text.length > 420
@@ -136,7 +124,14 @@ export function PassageCard({
           </button>
         )}
         <button
-          onClick={() => openSource(workspaceId, passage.file_id, passage.file_version_id, passage.location)}
+          onClick={() =>
+            onOpen({
+              fileId: passage.file_id,
+              fileName: passage.file_name,
+              versionId: passage.file_version_id,
+              location: passage.location,
+            })
+          }
           className="ml-auto flex items-center gap-1 text-xs font-medium text-slate-900 hover:underline"
         >
           {passage.location.page != null ? `Open page ${passage.location.page}` : 'Open file'}
@@ -147,11 +142,19 @@ export function PassageCard({
   )
 }
 
-export function FactCard({ fact, workspaceId }: { fact: FactResult; workspaceId: string }) {
+export function FactCard({ fact, onOpen }: { fact: FactResult; onOpen: (source: SearchSource) => void }) {
   const canOpen = Boolean(fact.file_id)
   return (
     <article
-      onClick={() => canOpen && openSource(workspaceId, fact.file_id!, fact.file_version_id, fact.location)}
+      onClick={() =>
+        canOpen &&
+        onOpen({
+          fileId: fact.file_id!,
+          fileName: fact.file_name || '',
+          versionId: fact.file_version_id,
+          location: fact.location,
+        })
+      }
       className={`group rounded-xl border border-slate-200 bg-white px-4 py-3 ${canOpen ? 'cursor-pointer hover:border-slate-300' : ''}`}
     >
       <div className="flex items-start justify-between gap-3 text-[11.5px] text-slate-400">
