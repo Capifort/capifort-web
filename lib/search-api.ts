@@ -5,6 +5,7 @@ export type MatchedBy = 'meaning' | 'keywords'
 
 export interface SearchLocation {
   page?: number
+  bbox?: number[] | null
   sheet?: string
   row_start?: number | null
   row_end?: number | null

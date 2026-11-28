@@ -1,22 +1,29 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import dynamic from 'next/dynamic'
 import { Download, X } from 'lucide-react'
-import { getFileDownloadUrl, getFileViewUrl, type FileItem } from '@/lib/file-api'
+import { getFileDownloadUrl, getFileViewUrl } from '@/lib/file-api'
 import { Spinner } from '@/components/spinner'
+import type { ViewerFocus } from '@/components/pdf-pages'
+
+const PdfPages = dynamic(() => import('@/components/pdf-pages'), { ssr: false })
 
 type ViewerStatus = 'loading' | 'not_ready' | 'error' | 'success'
 
 export function DocumentViewer({
   workspaceId,
   file,
+  focus,
   onClose,
 }: {
   workspaceId: string
-  file: FileItem
+  file: { id: string; name: string }
+  focus?: ViewerFocus
   onClose: () => void
 }) {
   const [viewUrl, setViewUrl] = useState('')
+  const [shownVersionId, setShownVersionId] = useState<string | null>(null)
   const [status, setStatus] = useState<ViewerStatus>('loading')
   const [downloading, setDownloading] = useState(false)
 
@@ -25,6 +32,7 @@ export function DocumentViewer({
     getFileViewUrl(workspaceId, file.id)
       .then((fileView) => {
         setViewUrl(fileView.view_url)
+        setShownVersionId(fileView.version_id)
         setStatus('success')
       })
       .catch((error) => setStatus(error.status === 409 ? 'not_ready' : 'error'))
@@ -82,9 +90,9 @@ export function DocumentViewer({
             </p>
           )}
           {status === 'error' && <p className="text-sm text-red-600">Couldn&apos;t open this document.</p>}
-          {/* The PDF is linearised, so the browser's viewer streams it with range requests
+          {/* The PDF is linearised, so pdf.js streams it with range requests
               and shows the first pages before the whole file has downloaded. */}
-          {status === 'success' && <iframe src={viewUrl} title={file.name} className="h-full w-full border-0" />}
+          {status === 'success' && <PdfPages url={viewUrl} focus={focus} shownVersionId={shownVersionId} />}
         </div>
       </div>
     </div>

@@ -4,9 +4,10 @@ import { Suspense, useEffect, useRef, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { AlertTriangle, ArrowUp, ChevronDown, Search, X } from 'lucide-react'
 import { useAuth } from '@/context/auth-context'
-import { getDomainFileTree, type DomainFolderNode } from '@/lib/file-api'
+import { getDomainFileTree, getFileDownloadUrl, type DomainFolderNode } from '@/lib/file-api'
 import { searchWorkspace, type SearchKind, type SearchResponse } from '@/lib/search-api'
-import { EntityCard, FactCard, PassageCard } from '@/components/search/result-cards'
+import { EntityCard, FactCard, PassageCard, type SearchSource } from '@/components/search/result-cards'
+import { DocumentViewer } from '@/components/document-viewer'
 
 const PROCESSES = [
   { id: 'P2P', label: 'Procure to pay' },
@@ -115,6 +116,7 @@ function SearchView() {
   const [searchResults, setSearchResults] = useState<SearchResponse | null>(null)
   const [errorMessage, setErrorMessage] = useState('')
   const [fileOptions, setFileOptions] = useState<FileOption[]>([])
+  const [viewingSource, setViewingSource] = useState<SearchSource | null>(null)
   const pendingRequest = useRef<AbortController | null>(null)
 
   useEffect(() => {
@@ -169,6 +171,15 @@ function SearchView() {
   const total = counts.passages + counts.facts + counts.entities
   const showGroup = (kind: SearchKind) => kindTab === 'all' || kindTab === kind
   const terms = searchResults?.terms || []
+
+  const openSource = async (source: SearchSource) => {
+    if (source.location.page != null) {
+      setViewingSource(source)
+      return
+    }
+    const download = await getFileDownloadUrl(workspaceId, source.fileId, source.versionId || undefined)
+    window.location.href = download.download_url
+  }
 
   return (
     <div className="min-h-dvh">
@@ -297,7 +308,7 @@ function SearchView() {
                   </h2>
                   {searchResults.passages.length === 0 && <p className="text-xs text-slate-400">No matching passages.</p>}
                   {searchResults.passages.map((passage) => (
-                    <PassageCard key={passage.chunk_id} passage={passage} terms={terms} workspaceId={workspaceId} />
+                    <PassageCard key={passage.chunk_id} passage={passage} terms={terms} onOpen={openSource} />
                   ))}
                 </section>
               )}
@@ -307,7 +318,7 @@ function SearchView() {
                     <h2 className="text-[11px] font-medium uppercase tracking-[0.16em] text-slate-400">Facts</h2>
                     {searchResults.facts.length === 0 && <p className="text-xs text-slate-400">No matching facts.</p>}
                     {searchResults.facts.map((fact) => (
-                      <FactCard key={fact.fact_id} fact={fact} workspaceId={workspaceId} />
+                      <FactCard key={fact.fact_id} fact={fact} onOpen={openSource} />
                     ))}
                   </section>
                 )}
@@ -325,6 +336,20 @@ function SearchView() {
           </>
         )}
       </div>
+
+      {viewingSource && (
+        <DocumentViewer
+          workspaceId={workspaceId}
+          file={{ id: viewingSource.fileId, name: viewingSource.fileName }}
+          focus={{
+            page: viewingSource.location.page!,
+            bbox: viewingSource.location.bbox,
+            versionId: viewingSource.versionId,
+            terms,
+          }}
+          onClose={() => setViewingSource(null)}
+        />
+      )}
     </div>
   )
 }

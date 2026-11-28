@@ -63,6 +63,7 @@ export interface FileView {
   name: string
   view_url: string
   expires_in_seconds: number
+  version_id: string | null
 }
 
 export interface FolderContents {
